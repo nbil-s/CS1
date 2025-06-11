@@ -1,15 +1,18 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import NavBar from './components/NavBar.jsx';
-import Login from './pages/Login.jsx';
 import HomePage from './pages/HomePage.jsx';
+import Login from './pages/Login.jsx';
+import Signup from './pages/Signup.jsx';
 
 function App() {
   return (
     <>
+    <NavBar />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/HomePage" element={<HomePage />} />
+        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/signup" element={<Signup/>} />
       </Routes>
     </>
   );
