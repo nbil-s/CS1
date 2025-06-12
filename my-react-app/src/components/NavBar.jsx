@@ -30,7 +30,7 @@ const NavBar = () => {
           <button type="button" className="btn btn-outline-primary">Login</button>
         </Link>
         <Link to="/signup">
-          <button type="button" className="btn btn-outline-primary">Sign In</button>
+          <button type="button" className="btn btn-outline-primary">Sign Up</button>
         </Link>
       </div>
     </div>

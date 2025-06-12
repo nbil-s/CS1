@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import NavBar from '../components/NavBar';
 import { Link } from 'react-router-dom';
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import usePasswordToggle from '../hooks/usePasswordToggle';
 import './Signup.css'
 
 function Signup(){
+    const [PasswordInputType, ToggleIcon] = usePasswordToggle();
+
     return(
     <>
     <div className="body">
@@ -11,28 +15,41 @@ function Signup(){
         <form action=''>
             <h1>Sign Up</h1>
             <div className='input-box'>
-                <input type="text" placeholder='Username' required/>
+                <input type="text" placeholder='Enter Your Name' required/>
                 < i class='bx  bx-user'  ></i>
             </div>
             <div className='input-box'>
-                <input type="password" placeholder='Password' required/>
-                < i class='bx  bx-lock'  ></i> 
+                <input type="text" placeholder='Enter email address' required/>
+                < i class='bx  bx-envelope-open'  ></i>
             </div>
-            <div className='remember-forgot'>
-                <label> <input type='checkbox'/>Remember Me</label>
-                <Link to='/pass-reset' className='nav-link'>Forgot password?</Link>
+            <div className='input-box'>
+                <input
+                    type={PasswordInputType}
+                    placeholder='Password'
+                    id='password'
+                    required
+                />
+                <span className='password-toggle-icon'>
+                    {ToggleIcon}
+                </span>
             </div>
-            <Link>
-                <button type='submit' className='button'>Login</button>
+            <div className='input-box'>
+                <input
+                    type={PasswordInputType}
+                    placeholder='Confirm Password'
+                    id='password'
+                    required
+                />
+                <span className='password-toggle-icon'>
+                    {ToggleIcon}
+                </span>
+            </div>
+            <Link to={'/numberanddetails'}>
+                <button type='submit' className='button'>Sign Up</button>
             </Link>
-
-            <div className='register-link'>
-                <p>Don't have an Account?
-                    <Link to="/signup" className='nav_link'>Sign Up</Link>
-                </p>
-            </div>
         </form>
         </div>
+        
     </div>
     </>
     );

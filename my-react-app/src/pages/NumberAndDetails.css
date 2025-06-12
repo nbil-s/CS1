@@ -11,7 +11,7 @@
 }
 .wrapper{
     width: 420px;
-    padding: 40px 45px 30px 45px;
+    padding: 40px 30px 30px 30px;
     background: 2px solid rgba(255, 254, 254, 0.1);
     backdrop-filter: blur(5px);
     box-shadow: 0 0 10px rgba(0, 0, 0, .2);
@@ -52,22 +52,6 @@
     position: absolute;
     right: 20px;
     top: 25px;
-    transform: translateY(-50%);
-    font-size: 20px;
-}
-
-.toggle-password{
-    position: absolute;
-    right: 20px;
-    bottom: 176px;
-    transform: translateY(-50%);
-    font-size: 20px;
-}
-
-.toggle-password-cofirm{
-    position: absolute;
-    right: 20px;
-    bottom: 176px;
     transform: translateY(-50%);
     font-size: 20px;
 }
