@@ -9,7 +9,7 @@ function Signup(){
     <div className="body">
         <div className='wrapper'>
         <form action=''>
-            <h1>Sign Up</h1>
+            <h1>Register</h1>
             <div className='input-box'>
                 <input type="text" placeholder='Username' required/>
                 < i class='bx  bx-user'  ></i>
