@@ -7,6 +7,7 @@ import './Signup.css'
 
 function Signup(){
     const [PasswordInputType, ToggleIcon] = usePasswordToggle();
+    const [ConfirmPasswordInputType, ConfirmIconToggle] = usePasswordToggle();
 
     return(
     <>
@@ -35,13 +36,13 @@ function Signup(){
             </div>
             <div className='input-box'>
                 <input
-                    type={PasswordInputType}
+                    type={ConfirmPasswordInputType}
                     placeholder='Confirm Password'
                     id='password'
                     required
                 />
                 <span className='password-toggle-icon'>
-                    {ToggleIcon}
+                    {ConfirmIconToggle}
                 </span>
             </div>
             <Link to={'/numberanddetails'}>

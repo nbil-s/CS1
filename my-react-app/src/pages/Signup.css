@@ -44,16 +44,19 @@
     padding: 20px 45px 20px 20px;
 }
 
+.input-box .password-toggle-icon{
+    position: absolute;
+    right: 20px;
+    bottom: 12px;
+}
+
 .input-box::placeholder{
     color: #fff;
 }
 
 .input-box i{
-    position: absolute;
-    right: 20px;
-    top: 25px;
-    transform: translateY(-50%);
-    font-size: 20px;
+    padding: 0px 0px 50px 80px;
+    left: 66.5%;
 }
 
 .toggle-password{
