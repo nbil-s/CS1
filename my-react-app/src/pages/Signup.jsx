@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import NavBar from '../components/NavBar';
 import { Link } from 'react-router-dom';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome"
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faUser, faEnvelopeOpen, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";      
 import usePasswordToggle from '../hooks/usePasswordToggle';
 import './Signup.css'
 
