@@ -1,0 +1,24 @@
+.navbar {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.6) !important;
+  }
+  
+  .navbar-brand {
+    font-size: 1.5rem;
+  }
+  
+  .navbar-nav .nav-link {
+    color: #ffffff;
+    margin-right: 1rem;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  .navbar-nav .nav-link:hover {
+    color: #0dcaf0;
+  }
+  
+  .btn-outline-light:hover {
+    color: #000;
+    background-color: #fff;
+  }
+  

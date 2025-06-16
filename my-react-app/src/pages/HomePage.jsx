@@ -1,33 +1,53 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '../components/NavBar.jsx';
-import './Homepage.css'
+import clinicBg from '../assets/clinic-bg.jpg'; // Import your image
+import './Homepage.css';
 
 function Homepage() {
+  const FeatureCard = ({ icon, title, text }) => (
+    <div className="feature-card">
+      <i className={`bi ${icon}`}></i>
+      <h5>{title}</h5>
+      <p>{text}</p>
+    </div>
+  );
+
   return (
     <>
-      <div className="body">
-        <div className="wrapper">
-          <form>
-            <h1>Queue Management System For Small General Clinics</h1>
-            <div className="">
-              <input type="text" placeholder="Username" required />
-              <i className="bx bx-user"></i>
-            </div>
-            <div className="input-box">
-              <input type="password" placeholder="Password" required />
-              <i className="bx bx-lock"></i>
-            </div>
-            <div className="remember-forgot">
-              <label><input type="checkbox" /> Remember Me</label>
-              <Link to="/pass-reset" className="nav-link">Forgot password?</Link>
-            </div>
-            <button type="submit" className="button">Login</button>
-            <div className="register-link">
-              <p>Don't have an account? <Link to="/signup" className="nav-link">Sign Up</Link></p>
-            </div>
-          </form>
-        </div>
+      <div className="landing">
+        {/* Hero */}
+        <header className="hero" style={{ backgroundImage: `url(${clinicBg})` }}>
+          <div className="overlay">
+            <h1>Welcome to ClinicQueue</h1>
+            <p>Effortless check-ins and shorter wait times.</p>
+            <Link to="/login" className="cta-btn">Get Started</Link>
+          </div>
+        </header>
+
+        {/* Features */}
+        <section className="features">
+          <FeatureCard
+            icon="bi-phone"
+            title="Online Booking"
+            text="Join the queue remotely using your phone."
+          />
+          <FeatureCard
+            icon="bi-clock"
+            title="Real-Time Updates"
+            text="Track your queue position live."
+          />
+          <FeatureCard
+            icon="bi-envelope"
+            title="Notifications"
+            text="Get SMS or email when it's your turn."
+          />
+        </section>
+
+        {/* Footer */}
+        <footer className="footer">
+          <p>&copy; 2025 ClinicQueue. All rights reserved.</p>
+        </footer>
       </div>
     </>
   );
