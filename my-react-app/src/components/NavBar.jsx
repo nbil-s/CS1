@@ -77,6 +77,7 @@ const NavBar = () => {
                       <Link to="/view-queue" className="nav-link">View Queue</Link>
                       <Link to="/queue-up" className="nav-link">Queue Up</Link>
                       <Link to="/appointment-page" className="nav-link">Appointment</Link>
+                      <Link to="/my-appointments" className="nav-link">My Appointments</Link>
                     </>
                   )}
                 </>

@@ -63,9 +63,9 @@ function Signup() {
 
             if (response.data) {
                 console.log('Registration successful!');
-                // Show success message and redirect to login
-                alert('Registration successful! Please log in with your new account.');
-                navigate('/login');
+                // Show success message and redirect to OTP verification
+                alert('Registration successful! Check your email for the OTP.');
+                navigate('/verify-otp', { state: { email: formData.email } });
             }
         } catch (err) {
             console.error('Registration error:', err);

@@ -4,6 +4,7 @@ import mysql from 'mysql2';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 dotenv.config();
 
 const app = express();
@@ -25,6 +26,9 @@ db.connect(err => {
   console.log('Connected to MySQL');
 });
 
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // ensures 6-digit
+}
 
 app.post('/api/signup', async (req, res) => {
   const { name, email, password } = req.body;
@@ -32,10 +36,19 @@ app.post('/api/signup', async (req, res) => {
   if (!name || !email || !password)
     return res.status(400).json({ success: false, message: 'All fields are required' });
 
-  const domain = email.split('@')[1];
-  const allowed = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
-  if (!allowed.includes(domain.toLowerCase()))
-    return res.status(400).json({ success: false, message: 'Email domain not allowed' });
+  const allowedDomains = [
+    'gmail.com',
+    'yahoo.com',
+    'outlook.com',
+    'hotmail.com'
+  ];
+  const emailDomain = email.toLowerCase().split('@')[1];
+  if (!allowedDomains.includes(emailDomain)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please use a valid email from a known domain like Gmail or Outlook.'
+    });
+  }
 
   const checkUserSql = 'SELECT * FROM users WHERE email = ?';
   db.query(checkUserSql, [email], async (err, results) => {
@@ -44,11 +57,9 @@ app.post('/api/signup', async (req, res) => {
       return res.status(409).json({ success: false, message: 'Email already in use' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const insertUserSql = 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)';
     db.query(insertUserSql, [name, email, hashedPassword], (err) => {
       if (err) return res.status(500).json({ success: false, message: 'Failed to register user' });
-
       res.status(200).json({
         success: true,
         message: 'User registered successfully'
@@ -80,6 +91,40 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+app.post('/api/send-otp', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ success: false, message: 'Email is required' });
+  }
+
+  const otp = generateOTP();
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'clinic.queue.management@gmail.com',
+      pass: 'ClinicManager@2025'
+    }
+  });
+
+  const mailOptions = {
+    from: 'clinic.queue.management@gmail.com',
+    to: email,
+    subject: 'ClinicQueue OTP Verification Code',
+    text: `Your OTP code is: ${otp}`
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+      console.error('Error sending OTP: ', err);
+      return res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    } else {
+      console.log('OTP sent:', info.response);
+      return res.status(200).json({ success: true, message: 'OTP sent successfully' });
+    }
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
