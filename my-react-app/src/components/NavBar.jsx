@@ -1,117 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
 import './NavBar.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSignOutAlt, faUser, faHome, faCalendarAlt, faListAlt, faFileMedical, faPills, faUserMd, faUserNurse, faUserShield, faClipboardList, faEye, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 const NavBar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [unreadCount, setUnreadCount] = useState(0);
-
-  useEffect(() => {
-    if (user && user.role === 'patient') {
-      fetchUnreadCount();
-    }
-  }, [user]);
-
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await api.get('/notifications/patient/unread-count');
-      setUnreadCount(response.data.unreadCount || 0);
-    } catch (err) {
-      console.error('Error fetching unread count:', err);
-    }
-  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const getDashboardLink = () => {
-    if (!user) return null;
-    
+  if (!user) {
+    return (
+      <nav className="navbar">
+        <div className="nav-container">
+          <Link to="/" className="nav-logo">
+            <FontAwesomeIcon icon={faHome} /> Clinic Queue
+          </Link>
+          <div className="nav-menu">
+            <Link to="/login" className="nav-link">
+              <FontAwesomeIcon icon={faUser} /> Login
+            </Link>
+            <Link to="/signup" className="nav-link">
+              <FontAwesomeIcon icon={faUser} /> Sign Up
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  const renderPatientLinks = () => (
+    <>
+      <Link to="/patient/dashboard" className="nav-link">
+        <FontAwesomeIcon icon={faHome} /> Dashboard
+      </Link>
+      <Link to="/book" className="nav-link">
+        <FontAwesomeIcon icon={faCalendarAlt} /> Book Appointment
+      </Link>
+      <Link to="/queue" className="nav-link">
+        <FontAwesomeIcon icon={faListAlt} /> Join Queue
+      </Link>
+      <Link to="/queue-status" className="nav-link">
+        <FontAwesomeIcon icon={faEye} /> Queue Status
+      </Link>
+      <Link to="/medical-records" className="nav-link">
+        <FontAwesomeIcon icon={faFileMedical} /> Medical Records
+      </Link>
+      <Link to="/prescriptions" className="nav-link">
+        <FontAwesomeIcon icon={faPills} /> Prescriptions
+      </Link>
+    </>
+  );
+
+  const renderDoctorLinks = () => (
+    <>
+      <Link to="/doctor/dashboard" className="nav-link">
+        <FontAwesomeIcon icon={faUserMd} /> Dashboard
+      </Link>
+      <Link to="/view-queue" className="nav-link">
+        <FontAwesomeIcon icon={faClipboardList} /> View Queue
+      </Link>
+      <Link to="/appointment-page" className="nav-link">
+        <FontAwesomeIcon icon={faCalendarAlt} /> Appointments
+      </Link>
+    </>
+  );
+
+  const renderReceptionistLinks = () => (
+    <>
+      <Link to="/receptionist/dashboard" className="nav-link">
+        <FontAwesomeIcon icon={faUserNurse} /> Dashboard
+      </Link>
+      <Link to="/queue-up" className="nav-link">
+        <FontAwesomeIcon icon={faPlus} /> Queue Management
+      </Link>
+      <Link to="/numberanddetails" className="nav-link">
+        <FontAwesomeIcon icon={faClipboardList} /> Number & Details
+      </Link>
+    </>
+  );
+
+  const renderAdminLinks = () => (
+    <>
+      <Link to="/admin/dashboard" className="nav-link">
+        <FontAwesomeIcon icon={faUserShield} /> Admin Dashboard
+      </Link>
+    </>
+  );
+
+  const renderUserLinks = () => {
     switch (user.role) {
       case 'patient':
-        return '/patient/dashboard';
+        return renderPatientLinks();
       case 'doctor':
-        return '/doctor/dashboard';
+        return renderDoctorLinks();
       case 'receptionist':
-        return '/receptionist/dashboard';
+        return renderReceptionistLinks();
       case 'admin':
-        return '/admin/dashboard';
+        return renderAdminLinks();
       default:
         return null;
     }
   };
 
   return (
-    <div className="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
-        <div className="container-fluid">
-          <Link to="/" className="navbar-brand">Hospital Management System</Link>
-
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
-            aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
+    <nav className="navbar">
+      <div className="nav-container">
+        <Link to="/" className="nav-logo">
+          <FontAwesomeIcon icon={faHome} /> Clinic Queue
+        </Link>
+        <div className="nav-menu">
+          {renderUserLinks()}
+          <button onClick={handleLogout} className="nav-link logout-btn">
+            <FontAwesomeIcon icon={faSignOutAlt} /> Logout
           </button>
-
-          <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div className="navbar-nav me-auto">
-              <Link to="/" className="nav-link">Home</Link>
-              {!user && (
-                <>
-                  <Link to="/login" className="nav-link">Login</Link>
-                  <Link to="/signup" className="nav-link">Sign Up</Link>
-                </>
-              )}
-              {user && (
-                <>
-                  <Link to={getDashboardLink()} className="nav-link">Dashboard</Link>
-                  {user.role === 'patient' && (
-                    <>
-                      <Link to="/book" className="nav-link">Book Appointment</Link>
-                      <Link to="/queue" className="nav-link">Queue</Link>
-                      <Link to="/view-queue" className="nav-link">View Queue</Link>
-                      <Link to="/queue-up" className="nav-link">Queue Up</Link>
-                      <Link to="/appointment-page" className="nav-link">Appointment</Link>
-                      <Link to="/my-appointments" className="nav-link">My Appointments</Link>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            
-            {user && (
-              <div className="navbar-nav">
-                {user.role === 'patient' && unreadCount > 0 && (
-                  <div className="nav-item">
-                    <Link to={getDashboardLink()} className="nav-link position-relative">
-                      Notifications
-                      <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {unreadCount}
-                      </span>
-                    </Link>
-                  </div>
-                )}
-                <div className="nav-item dropdown">
-                  <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    {user.name}
-                  </a>
-                  <ul className="dropdown-menu">
-                    <li><span className="dropdown-item-text">Role: {user.role}</span></li>
-                    <li><hr className="dropdown-divider" /></li>
-                    <li><button className="dropdown-item" onClick={handleLogout}>Logout</button></li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
-      </nav>
-    </div>
+      </div>
+    </nav>
   );
 };
 

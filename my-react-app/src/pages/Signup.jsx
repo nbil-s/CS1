@@ -1,168 +1,188 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import usePasswordToggle from '../hooks/usePasswordToggle';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import './Signup.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash, faEnvelope, faLock, faUser, faUserPlus, faPhone } from '@fortawesome/free-solid-svg-icons';
 
-function Signup() {
-    const [PasswordInputType, ToggleIcon] = usePasswordToggle();
-    const [formData, setFormData] = useState({
-        username: '',
+const Signup = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await api.post('/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone
+      });
+
+      setSuccess('Account created successfully! Please check your email for verification.');
+      setFormData({
+        name: '',
         email: '',
         password: '',
-        confirmPassword: ''
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+        confirmPassword: '',
+        phone: ''
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        // Enhanced validation from cherry-picked commit
-        if (formData.username.length < 3 || formData.username.length > 40) {
-            setError('Name must be between 3 and 40 characters.');
-            return;
-        }
-
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com)$/;
-        if (!emailRegex.test(formData.email)) {
-            setError('Enter a valid email address from allowed domains (gmail, yahoo, outlook, hotmail).');
-            return;
-        }
-
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        if (!passwordRegex.test(formData.password)) {
-            setError('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
-            return;
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            // Register the user
-            const response = await api.post('/auth/register', {
-                name: formData.username,
-                email: formData.email,
-                password: formData.password
-            });
-
-            if (response.data) {
-                console.log('Registration successful!');
-                // Show success message and redirect to OTP verification
-                alert('Registration successful! Check your email for the OTP.');
-                navigate('/verify-otp', { state: { email: formData.email } });
-            }
-        } catch (err) {
-            console.error('Registration error:', err);
-            if (err.response) {
-                console.log('Error response:', err.response.data);
-                setError(err.response.data.message || 'Registration failed');
-            } else if (err.request) {
-                setError('Network error. Please check your connection.');
-            } else {
-                setError('An error occurred. Please try again.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="body">
-            <div className='wrapper'>
-                <form onSubmit={handleSubmit}>
-                    <h1>Welcome</h1>
-                    <p>Please fill in the details to register</p>
-                    
-                    {error && (
-                        <div className="alert alert-danger" role="alert">
-                            {error}
-                        </div>
-                    )}
-
-                    <div className='input-box'>
-                        <input 
-                            type="text" 
-                            name="username"
-                            placeholder='Enter Your Name' 
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className='input-box'>
-                        <input 
-                            type="email" 
-                            name="email"
-                            placeholder='Enter email address' 
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
-
-                    <div className='input-box'>
-                        <input
-                            type={PasswordInputType}
-                            name="password"
-                            placeholder='Password'
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                        <span className='password-toggle-icon'>
-                            {ToggleIcon}
-                        </span>
-                    </div>
-
-                    <div className='input-box'>
-                        <input
-                            type={PasswordInputType}
-                            name="confirmPassword"
-                            placeholder='Confirm Password'
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                        />
-                        <span className='password-toggle-icon'>
-                            {ToggleIcon}
-                        </span>
-                    </div>
-
-                    <button 
-                        type='submit' 
-                        className='button'
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                Creating Account...
-                            </>
-                        ) : (
-                            'Sign Up'
-                        )}
-                    </button>
-                </form>
+  return (
+    <div className="signup-container">
+      <div className="signup-card">
+        <h2>Create Account</h2>
+        <p>Join us today! Please fill in your details.</p>
+        
+        {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <div className="input-group">
+              <FontAwesomeIcon icon={faUser} className="input-icon" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="form-input"
+              />
             </div>
+          </div>
+          
+          <div className="form-group">
+            <div className="input-group">
+              <FontAwesomeIcon icon={faEnvelope} className="input-icon" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                className="form-input"
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <div className="input-group">
+              <FontAwesomeIcon icon={faPhone} className="input-icon" />
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Phone Number"
+                value={formData.phone}
+                onChange={handleInputChange}
+                required
+                className="form-input"
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <div className="input-group">
+              <FontAwesomeIcon icon={faLock} className="input-icon" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                className="form-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <div className="input-group">
+              <FontAwesomeIcon icon={faLock} className="input-icon" />
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                required
+                className="form-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+              </button>
+            </div>
+          </div>
+          
+          <button type="submit" className="signup-btn" disabled={loading}>
+            {loading ? 'Creating Account...' : (
+              <>
+                <FontAwesomeIcon icon={faUserPlus} /> Sign Up
+              </>
+            )}
+          </button>
+        </form>
+        
+        <div className="signup-footer">
+          <p>Already have an account? <Link to="/login" className="login-link">Login</Link></p>
         </div>
-    );
-}
+      </div>
+    </div>
+  );
+};
 
 export default Signup;

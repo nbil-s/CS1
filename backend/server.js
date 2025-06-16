@@ -14,7 +14,7 @@ const app = express();
 
 // Configure CORS to handle credentials
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://localhost:5173'], // Allow both HTTP and HTTPS
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://localhost:5173', 'https://localhost:5174'], // Allow both ports
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']

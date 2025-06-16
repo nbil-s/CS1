@@ -55,6 +55,12 @@ exports.addToQueue = async (req, res) => {
     verifyToken(req, res, async () => {
       const { patientId, doctorId, priority, notes } = req.body;
 
+      // Validate patientId
+      const patient = await User.findByPk(patientId);
+      if (!patient) {
+        return res.status(400).json({ message: 'Invalid patientId: user does not exist' });
+      }
+
       // Get next queue number
       const lastQueue = await Queue.findOne({
         order: [['queueNumber', 'DESC']]
@@ -94,6 +100,53 @@ exports.addToQueue = async (req, res) => {
   } catch (error) {
     console.error('Add to queue error:', error);
     res.status(500).json({ message: 'Failed to add to queue', error: error.message });
+  }
+};
+
+// Add patient to queue (self-service, patient)
+exports.createQueue = async (req, res) => {
+  try {
+    verifyToken(req, res, async () => {
+      const { doctorId, priority, notes } = req.body;
+      const patientId = req.user.id;
+
+      // Get next queue number
+      const lastQueue = await Queue.findOne({
+        order: [['queueNumber', 'DESC']]
+      });
+      const nextNumber = (lastQueue?.queueNumber || 0) + 1;
+
+      // Calculate estimated wait time (15 minutes per person ahead)
+      const waitingCount = await Queue.count({ where: { status: 'waiting' } });
+      const estimatedWait = waitingCount * 15;
+
+      const queueEntry = await Queue.create({
+        patientId,
+        doctorId,
+        queueNumber: nextNumber,
+        priority,
+        estimatedWaitTime: estimatedWait,
+        notes
+      });
+
+      // Create notification for patient
+      await createNotification(
+        patientId,
+        'queue',
+        'Added to Queue',
+        `You have been added to the queue with number ${nextNumber}. Estimated wait time: ${estimatedWait} minutes.`,
+        queueEntry.id,
+        'queue'
+      );
+
+      res.status(201).json({
+        message: 'You have been added to the queue',
+        queueEntry
+      });
+    });
+  } catch (error) {
+    console.error('Patient add to queue error:', error);
+    res.status(500).json({ message: 'Failed to join queue', error: error.message });
   }
 };
 

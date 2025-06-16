@@ -17,6 +17,7 @@ import AdminDashboard from './pages/dashboards/AdminDashboard';
 // New imports from cherry-picked commit
 import EmailVerification from './pages/EmailVerification.jsx';
 import QueueUp from './pages/QueueUp.jsx';
+import OtpVerify from './pages/OtpVerify.jsx';
 import NumberAndDetails from './pages/NumberAndDetails.jsx';
 import ViewQueue from './pages/ViewQueue.jsx';
 import AppointmentPage from './pages/AppointmentPage.jsx';
@@ -47,6 +48,7 @@ function App() {
         />
         {/* New routes from cherry-picked commit */}
         <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/verify-otp" element={<OtpVerify />} />
         <Route path="/appointment-page" element={<AppointmentPage />} />
         <Route path="/view-queue" element={<ViewQueue />} />
         <Route path="/queue-up" element={<QueueUp />} />

@@ -1,0 +1,13 @@
+.appointment-page {
+    background-color: #f9fbfc;
+    min-height: 100vh;
+  }
+  
+  .card {
+    border-radius: 12px;
+  }
+  
+  .form-label {
+    font-weight: 500;
+  }
+  

@@ -4,12 +4,14 @@ const {
   addToQueue, 
   updateQueueStatus, 
   getQueueManagement, 
-  removeFromQueue 
+  removeFromQueue, 
+  createQueue 
 } = require('../controllers/queueController');
 const router = express.Router();
 
 // Patient queue routes
 router.get('/current', getCurrentQueue);
+router.post('/', createQueue);
 
 // Receptionist queue management routes
 router.get('/management', getQueueManagement);

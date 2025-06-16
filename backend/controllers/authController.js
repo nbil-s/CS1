@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
+const { Op } = require('sequelize');
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -103,8 +104,15 @@ exports.login = async (req, res) => {
       return res.status(500).json({ message: 'Server configuration error' });
     }
 
-    console.log('Looking for user with email:', identifier);
-    const user = await User.findOne({ where: { email: identifier } });
+    console.log('Looking for user with email or username:', identifier);
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: identifier },
+          { name: identifier }
+        ]
+      }
+    });
     console.log('User found:', user ? { id: user.id, email: user.email, role: user.role } : 'No user found');
 
     if (!user) {

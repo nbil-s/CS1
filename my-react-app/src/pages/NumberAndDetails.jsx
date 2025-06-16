@@ -11,11 +11,11 @@ function NumberAndDetails(){
             <h1>Other Details</h1>
             <div className='input-box'>
                 <input type="tel" placeholder='PhoneNumber' required/>
-                < i class='bx  bx-user'  ></i>
+                < i className='bx  bx-user'  ></i>
             </div>
             <div className='input-box'>
                 <input type="date" placeholder='DOB' required/>
-                < i class='bx  bx-lock'  ></i> 
+                < i className='bx  bx-lock'  ></i> 
             </div>
             <div className='remember-forgot'>
                 <label> <input type='checkbox'/>Remember Me</label>

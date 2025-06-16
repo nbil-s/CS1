@@ -8,7 +8,7 @@ export default function QueueStatus() {
     const fetchQueue = async () => {
       try {
         const res = await api.get('/patient/queue');
-        setQueue(res.data);
+        setQueue(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         alert('Could not fetch queue.');
       }

@@ -47,7 +47,6 @@ function QueueUp() {
       alert('Something went wrong while joining the queue.');
     }
   };
-  
 
   return (
     <div className="container queueup-page py-5 mt-5">

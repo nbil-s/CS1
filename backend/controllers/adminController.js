@@ -1,4 +1,5 @@
 const { User, Appointment, Queue, Notification } = require('../models');
+const bcrypt = require('bcryptjs');
 
 // Middleware to verify JWT token and admin role
 const verifyAdminToken = (req, res, next) => {
@@ -20,6 +21,195 @@ const verifyAdminToken = (req, res, next) => {
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
+// Add new staff member (doctor or receptionist)
+exports.addStaffMember = async (req, res) => {
+  try {
+    verifyAdminToken(req, res, async () => {
+      const { 
+        name, 
+        email, 
+        password, 
+        role, 
+        phone, 
+        specialization, 
+        licenseNumber, 
+        department 
+      } = req.body;
+
+      // Validate required fields
+      if (!name || !email || !password || !role) {
+        return res.status(400).json({ message: 'Name, email, password, and role are required' });
+      }
+
+      // Validate role
+      if (!['doctor', 'receptionist'].includes(role)) {
+        return res.status(400).json({ message: 'Role must be either doctor or receptionist' });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ message: 'User with this email already exists' });
+      }
+
+      // Validate role-specific fields
+      if (role === 'doctor' && !specialization) {
+        return res.status(400).json({ message: 'Specialization is required for doctors' });
+      }
+
+      if (role === 'receptionist' && !department) {
+        return res.status(400).json({ message: 'Department is required for receptionists' });
+      }
+
+      // Hash password
+      const passwordHash = bcrypt.hashSync(password, 10);
+
+      // Create user with role-specific data
+      const userData = {
+        name,
+        email,
+        passwordHash,
+        role,
+        phone,
+        isActive: true,
+        createdBy: req.user.id
+      };
+
+      // Add role-specific fields
+      if (role === 'doctor') {
+        userData.specialization = specialization;
+        userData.licenseNumber = licenseNumber;
+      } else if (role === 'receptionist') {
+        userData.department = department;
+      }
+
+      const user = await User.create(userData);
+
+      res.status(201).json({
+        message: `${role.charAt(0).toUpperCase() + role.slice(1)} added successfully`,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          specialization: user.specialization,
+          licenseNumber: user.licenseNumber,
+          department: user.department,
+          isActive: user.isActive
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Add staff member error:', error);
+    res.status(500).json({ message: 'Failed to add staff member', error: error.message });
+  }
+};
+
+// Get all staff members (doctors and receptionists)
+exports.getStaffMembers = async (req, res) => {
+  try {
+    verifyAdminToken(req, res, async () => {
+      const { role, isActive } = req.query;
+      
+      const whereClause = {
+        role: ['doctor', 'receptionist']
+      };
+
+      if (role) {
+        whereClause.role = role;
+      }
+
+      if (isActive !== undefined) {
+        whereClause.isActive = isActive === 'true';
+      }
+
+      const staff = await User.findAll({
+        where: whereClause,
+        attributes: { exclude: ['passwordHash'] },
+        order: [['createdAt', 'DESC']]
+      });
+
+      res.json({ staff });
+    });
+  } catch (error) {
+    console.error('Get staff members error:', error);
+    res.status(500).json({ message: 'Failed to get staff members', error: error.message });
+  }
+};
+
+// Update staff member
+exports.updateStaffMember = async (req, res) => {
+  try {
+    verifyAdminToken(req, res, async () => {
+      const { userId } = req.params;
+      const { 
+        name, 
+        email, 
+        phone, 
+        specialization, 
+        licenseNumber, 
+        department, 
+        isActive 
+      } = req.body;
+
+      const user = await User.findByPk(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'Staff member not found' });
+      }
+
+      if (!['doctor', 'receptionist'].includes(user.role)) {
+        return res.status(400).json({ message: 'Can only update staff members' });
+      }
+
+      // Check if email is being changed and if it's already taken
+      if (email && email !== user.email) {
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+          return res.status(400).json({ message: 'Email already in use' });
+        }
+      }
+
+      // Update user data
+      const updateData = {
+        name: name || user.name,
+        email: email || user.email,
+        phone: phone || user.phone,
+        isActive: isActive !== undefined ? isActive : user.isActive
+      };
+
+      // Add role-specific fields
+      if (user.role === 'doctor') {
+        updateData.specialization = specialization || user.specialization;
+        updateData.licenseNumber = licenseNumber || user.licenseNumber;
+      } else if (user.role === 'receptionist') {
+        updateData.department = department || user.department;
+      }
+
+      await user.update(updateData);
+      
+      res.json({ 
+        message: 'Staff member updated successfully', 
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          specialization: user.specialization,
+          licenseNumber: user.licenseNumber,
+          department: user.department,
+          isActive: user.isActive
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Update staff member error:', error);
+    res.status(500).json({ message: 'Failed to update staff member', error: error.message });
   }
 };
 
@@ -198,8 +388,7 @@ exports.getAuditLogs = async (req, res) => {
         id: user.id,
         action: 'User Activity',
         details: `${user.name} (${user.role}) - Last updated: ${user.updatedAt}`,
-        timestamp: user.updatedAt,
-        user: user.name
+        timestamp: user.updatedAt
       }));
 
       res.json({ auditLogs });
