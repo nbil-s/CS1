@@ -6,18 +6,15 @@ import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
 import Dashboard from './pages/Dashboard.jsx'; 
 
-
-
 function App() {
   return (
     <>
-    <NavBar />
-      <Routes>
+      <NavBar />
+      <Routes><Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/homepage" element={<HomePage />} />
-        <Route path="/signup" element={<Signup/>} />
-       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </>
   );
