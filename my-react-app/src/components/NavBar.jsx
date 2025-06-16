@@ -16,7 +16,7 @@ const NavBar = () => {
 
         <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
           <div className="navbar-nav">
-            <Link to="/homepage" className="nav-link">Home</Link>
+            <Link to="/" className="nav-link">Home</Link>
             <Link to="/view-queue" className="nav-link">View Queue</Link>
             <Link to="/appointment-page" className="nav-link">Appointment</Link>
             <Link to="/queue-up" className="nav-link">Queue Up</Link>

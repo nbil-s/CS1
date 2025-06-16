@@ -20,7 +20,7 @@ function App() {
         <Route path="/view-queue" element={<ViewQueue />} />
         <Route path="/queue-up" element={<QueueUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/homepage" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<Signup/>} />
         <Route path="numberanddetails" element={<NumberAndDetails/>} />
       </Routes>

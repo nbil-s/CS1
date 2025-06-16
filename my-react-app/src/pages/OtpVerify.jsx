@@ -1,51 +1,62 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import './OtpVerify.css';
 
+function OtpVerify({ onSubmit }) {
+  const [otp, setOtp] = useState(Array(6).fill(''));
+  const inputRefs = useRef([]);
 
-function OtpVerify() {
-  const [otp, setOtp] = useState('');
-  const [email, setEmail] = useState(''); // Optionally get from signup state
-  const navigate = useNavigate();
+  const handleChange = (value, index) => {
+    if (!/^\d?$/.test(value)) return; // allow only digits
 
-  const handleVerify = async (e) => {
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+
+    if (!value && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    const response = await fetch('http://localhost:5000/api/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, otp }),
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      alert('Email verified! You can now log in.');
-      navigate('/login'); // Or any page you want after verification
+    const enteredOtp = otp.join('');
+    if (enteredOtp.length === 6) {
+      onSubmit(enteredOtp);
     } else {
-      alert(data.message || 'OTP verification failed.');
+      alert('Please enter the 6-digit OTP.');
     }
   };
 
   return (
-    <div className="otp-container">
-      <form onSubmit={handleVerify}>
-        <h2>Enter OTP</h2>
-        <input
-          type="text"
-          maxLength={6}
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          placeholder="Enter 6-digit OTP"
-          required
-        />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email again"
-          required
-        />
-        <button type="submit">Verify OTP</button>
+    <div className="otp-wrapper">
+      <h2>Enter OTP</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="otp-inputs">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              type="text"
+              inputMode="numeric"
+              maxLength="1"
+              className="otp-box"
+              value={digit}
+              onChange={(e) => handleChange(e.target.value, index)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              ref={(el) => (inputRefs.current[index] = el)}
+            />
+          ))}
+        </div>
+        <button type="submit" className="submit-btn">Verify</button>
       </form>
     </div>
   );

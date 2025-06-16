@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Signup.css';
 import usePasswordToggle from '../hooks/usePasswordToggle';
 
 function Signup() {
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +32,7 @@ function Signup() {
       const data = await response.json();
       if (data.success) {
         alert('Signup successful! Check your email for the OTP.');
+        navigate('/verify-otp', {state: {email}})
       } else {
         alert(data.message);
       }

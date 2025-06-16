@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mysql from 'mysql2';
 import bcrypt from 'bcrypt';
-
+import nodemailer from 'nodemailer';
 
 
 const app = express()
@@ -18,6 +18,11 @@ const db = mysql.createConnection({
     database: 'queue_manager'
 })
 
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // ensures 6-digit
+}
+
+
 db.connect((err) => {
     if (err) throw err;
     console.log('Connected to MySql database')
@@ -31,6 +36,20 @@ app.post('/api/signup', async (req, res) => {
     }
   
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    const allowedDomains = [
+        'gmail.com',
+        'yahoo.com',
+        'outlook.com',
+        'hotmail.com'
+    ]
+    const emailDomain = email.toLowerCase().split('@')[1];
+    if(!allowedDomains.includes(emailDomain)){
+        return res.status(400).json({
+            success: false,
+            message: 'Please use a valid email from a known domain like Gmail or Outlook.'
+        })
+    }
   
     const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
     db.query(checkEmailSql, [email], (err, results) => {
@@ -54,6 +73,41 @@ app.post('/api/signup', async (req, res) => {
       });
     });
   });
+
+  app.post('api/send-otp', async(req, res) => {
+    const {email} = req.body;
+
+    if (!email) {
+      return res.status(400).json({success: false, message: 'Email is required'});
+    }
+
+    const otp = generateOTP();
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'clinic.queue.management@gmail.com',
+        pass: 'ClinicManager@2025'
+      }
+    })
+
+    const mailOptions = {
+      from: 'clinic.queue.management@gmail.com',
+      to: email,
+      subject: 'ClinicQueue OTP Verfication Code',
+      text: 'Your OTP code is: ${otp}'
+    }
+
+    transporter.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        console.error('Error sending OTP: ', err);
+        return res.status(500).json({success: false, message: 'Failed to send OTP'});
+      } else {
+        console.log('OTP sent:', info.response);
+        return res.status(200).json({success: true, message: 'OTP sent successfully'})
+      }
+    })
+  })
   
 
 app.listen(PORT, () => {
