@@ -1,13 +1,11 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-
 
 const NavBar = () => {
   return (
     <div className="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
         <div className="container-fluid">
-          <Link to="/nav" className="navbar-brand">Navbar</Link>
+          <Link to="/" className="navbar-brand"> Queue Management</Link>
 
           <button className="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
@@ -17,22 +15,13 @@ const NavBar = () => {
 
           <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div className="navbar-nav">
-              <Link to="/homepage" className="nav-link active">Home</Link>
-              <Link to="/features" className="nav-link">Features</Link>
-              <Link to="/pricing" className="nav-link">Pricing</Link>
+              <Link to="/" className="nav-link">Home</Link>
+              <Link to="/login" className="nav-link">Login</Link>
+              <Link to="/signup" className="nav-link">Sign Up</Link>
             </div>
           </div>
         </div>
       </nav>
-
-      <div className="d-grid gap-2 d-md-flex justify-content-md-end p-3">
-        <Link to="/login">
-          <button type="button" className="btn btn-outline-primary">Login</button>
-        </Link>
-        <Link to="/signup">
-          <button type="button" className="btn btn-outline-primary">Sign Up</button>
-        </Link>
-      </div>
     </div>
   );
 };

@@ -1,20 +1,37 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import PatientDashboard from './dashboards/PatientDashboard';
+import DoctorDashboard from './dashboards/DoctorDashboard';
+import ReceptionistDashboard from './dashboards/ReceptionistDashboard';
+import AdminDashboard from './dashboards/AdminDashboard';
+import './Dashboard.css';
 
 export default function Dashboard() {
-  const role = localStorage.getItem('role'); // set after login response
+  const role = localStorage.getItem('role');
   const navigate = useNavigate();
 
-  return (
-    <div>
-      <h1>{role.toUpperCase()} Dashboard</h1>
-      {role === 'patient' && (
-        <div>
-          <button onClick={() => navigate('/book')}>Book Appointment</button>
-          <button onClick={() => navigate('/queue')}>Check Queue</button>
+  if (!role) {
+    navigate('/login');
+    return null;
+  }
+
+  switch (role) {
+    case 'patient':
+      return <PatientDashboard />;
+    case 'doctor':
+      return <DoctorDashboard />;
+    case 'receptionist':
+      return <ReceptionistDashboard />;
+    case 'admin':
+      return <AdminDashboard />;
+    default:
+      return (
+        <div className="dashboard-container">
+          <div className="dashboard-header">
+            <h1>Error</h1>
+            <p>Unknown user role. Please contact support.</p>
+          </div>
         </div>
-      )}
-      {/* Buttons for other roles can be added here */}
-    </div>
-  );
+      );
+  }
 }
