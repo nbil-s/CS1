@@ -21,7 +21,7 @@ function Homepage() {
           <div className="overlay">
             <h1>Welcome to ClinicQueue</h1>
             <p>Effortless check-ins and shorter wait times.</p>
-            <Link to="/login" className="cta-btn">Get Started</Link>
+            <Link to="/signup" className="cta-btn">Get Started</Link>
           </div>
         </header>
 

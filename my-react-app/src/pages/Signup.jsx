@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './Signup.css';
+import { useAuth } from '../context/AuthContext';
 import usePasswordToggle from '../hooks/usePasswordToggle';
 
 function Signup() {
+  const {login} = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -20,6 +22,23 @@ function Signup() {
       return;
     }
 
+    if (name.length < 3 || name.length > 40) {
+      alert('Name must be between 3 and 40 characters.');
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com)$/;
+    if (!emailRegex.test(email)) {
+      alert('Enter a valid email address from allowed domains (gmail, yahoo, outlook, hotmail).');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+      return;
+    }
+
     const user = { name, email, password };
 
     try {
@@ -31,8 +50,9 @@ function Signup() {
 
       const data = await response.json();
       if (data.success) {
-        alert('Signup successful! Check your email for the OTP.');
-        navigate('/verify-otp', {state: {email}})
+        alert('Signup successful!');
+        login(data.token);
+        navigate('/');
       } else {
         alert(data.message);
       }
@@ -47,15 +67,19 @@ function Signup() {
       <div className='wrapper'>
         <form onSubmit={handleSignup}>
           <h1>Sign Up</h1>
+
           <div className='input-box'>
             <input
               type="text"
               placeholder='Enter Your Name'
               value={name}
               onChange={(e) => setName(e.target.value)}
+              minLength={3}
+              maxLength={40}
               required
             />
           </div>
+
           <div className='input-box'>
             <input
               type="email"
@@ -65,6 +89,7 @@ function Signup() {
               required
             />
           </div>
+
           <div className='input-box'>
             <input
               type={PasswordInputType}
@@ -75,6 +100,7 @@ function Signup() {
             />
             <span className='password-toggle-icon'>{ToggleIcon}</span>
           </div>
+
           <div className='input-box'>
             <input
               type={ConfirmPasswordInputType}
@@ -85,7 +111,12 @@ function Signup() {
             />
             <span className='password-toggle-icon'>{ConfirmIconToggle}</span>
           </div>
+
           <button type='submit' className='button'>Sign Up</button>
+
+          <div className='register-link'>
+            <p>Have an Account? <Link to="/login" className='nav_link'>Login</Link></p>
+          </div>
         </form>
       </div>
     </div>

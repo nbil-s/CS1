@@ -1,0 +1,42 @@
+.verification-wrapper {
+  max-width: 500px;
+  margin: 100px auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.verification-wrapper h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.verification-wrapper p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-top: 1rem;
+}
+
+.verification-wrapper p::before {
+  content: '🔔 ';
+}
+
+@media (max-width: 600px) {
+  .verification-wrapper {
+    margin: 50px 1rem;
+    padding: 1.5rem;
+  }
+
+  .verification-wrapper h2 {
+    font-size: 1.5rem;
+  }
+
+  .verification-wrapper p {
+    font-size: 1rem;
+  }
+}

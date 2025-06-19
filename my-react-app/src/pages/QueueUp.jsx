@@ -17,11 +17,37 @@ function QueueUp() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Submit form logic here: send to backend
-    console.log(formData);
+  
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to join the queue.');
+        return;
+      }
+  
+      const response = await fetch('http://localhost:5000/api/queue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(formData)
+      });
+  
+      const data = await response.json();
+      if (data.success) {
+        alert('You have joined the queue successfully!');
+      } else {
+        alert(data.message || 'Failed to join queue.');
+      }
+    } catch (error) {
+      console.error('Queueing error:', error);
+      alert('Something went wrong while joining the queue.');
+    }
   };
+  
 
   return (
     <div className="container queueup-page py-5 mt-5">
