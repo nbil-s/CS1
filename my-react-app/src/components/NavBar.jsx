@@ -74,6 +74,9 @@ const NavBar = () => {
                     <>
                       <Link to="/book" className="nav-link">Book Appointment</Link>
                       <Link to="/queue" className="nav-link">Queue</Link>
+                      <Link to="/view-queue" className="nav-link">View Queue</Link>
+                      <Link to="/queue-up" className="nav-link">Queue Up</Link>
+                      <Link to="/appointment-page" className="nav-link">Appointment</Link>
                     </>
                   )}
                 </>

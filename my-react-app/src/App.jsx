@@ -14,6 +14,12 @@ import PatientDashboard from './pages/dashboards/PatientDashboard';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import ReceptionistDashboard from './pages/receptionist/ReceptionistDashboard';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
+// New imports from cherry-picked commit
+import EmailVerification from './pages/EmailVerification.jsx';
+import QueueUp from './pages/QueueUp.jsx';
+import NumberAndDetails from './pages/NumberAndDetails.jsx';
+import ViewQueue from './pages/ViewQueue.jsx';
+import AppointmentPage from './pages/AppointmentPage.jsx';
 
 function App() {
   return (
@@ -39,6 +45,12 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        {/* New routes from cherry-picked commit */}
+        <Route path="/verify-email" element={<EmailVerification />} />
+        <Route path="/appointment-page" element={<AppointmentPage />} />
+        <Route path="/view-queue" element={<ViewQueue />} />
+        <Route path="/queue-up" element={<QueueUp />} />
+        <Route path="/numberanddetails" element={<NumberAndDetails/>} />
         <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

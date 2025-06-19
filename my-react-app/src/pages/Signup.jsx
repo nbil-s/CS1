@@ -28,6 +28,24 @@ function Signup() {
         e.preventDefault();
         setError('');
 
+        // Enhanced validation from cherry-picked commit
+        if (formData.username.length < 3 || formData.username.length > 40) {
+            setError('Name must be between 3 and 40 characters.');
+            return;
+        }
+
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|hotmail\.com)$/;
+        if (!emailRegex.test(formData.email)) {
+            setError('Enter a valid email address from allowed domains (gmail, yahoo, outlook, hotmail).');
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+            setError('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
