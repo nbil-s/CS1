@@ -9,6 +9,8 @@
     background: url(../images/MDC.jpg) no-repeat;
     background-size: cover;
     background-position: center;
+    position: relative;
+    z-index: 0;
 }
 .wrapper{
     width: 420px;
@@ -19,6 +21,8 @@
     border: 3px rgba(0, 0, 0, .1);
     color: rgb(0, 0, 0);
     border-radius: 10px;
+    z-index: 1;
+    position: relative;
 }
 
 .wrapper h1{
@@ -107,3 +111,66 @@
 .register-link p .nav_link:hover{
     text-decoration: underline;
 }
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .modal {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+  }
+  
+  .modal input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 1rem;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+  
+  .button.cancel {
+    background-color: #ddd;
+    color: #000;
+  }
+  
+  .success {
+    color: green;
+    margin-top: 10px;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 10px;
+  }
+  
+  .link-button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 1rem;
+    padding: 0;
+  }
+  
