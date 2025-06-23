@@ -26,7 +26,7 @@ function QueueUp() {
         return;
       }
 
-      const response = await fetch("http://localhost:8000/api/queue", {
+      const response = await fetch("http://localhost:5000/api/queue", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,8 +38,8 @@ function QueueUp() {
       const data = await response.json();
 
       if (data.success) {
-        alert('Successfully joined the queue!');
-        setFormData({ name: '', phone: '', service: '', reason: '' }); // reset form
+        alert(`Successfully joined the queue. Your ticket number is: ${data.ticket}`);
+        setFormData({ name: '', phone: '', service: '', reason: '' });
       } else {
         alert(data.message || 'Something went wrong.');
       }
@@ -67,11 +67,12 @@ function QueueUp() {
           <label className="form-label">Service</label>
           <select className="form-select" name="service" required value={formData.service} onChange={handleChange}>
             <option value="">-- Select Service --</option>
-            <option value="consultation">Consultation</option>
-            <option value="checkup">Check-up</option>
-            <option value="dental">Dental</option>
-            <option value="vaccine">Vaccination</option>
-            <option value="other">Other</option>
+            <option value="Consultation">Consultation</option>
+            <option value="Checkup">Check-up</option>
+            <option value="Dental">Dental</option>
+            <option value="Pediatrics">Pediatrics</option>
+            <option value="Vaccination">Vaccination</option>
+            <option value="Other">Other</option>
           </select>
         </div>
 

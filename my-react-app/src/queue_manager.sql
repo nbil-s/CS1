@@ -1,0 +1,22 @@
+CREATE DATABASE queue_manager;
+USE queue_manager;
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password VARCHAR(255),
+  token VARCHAR(255),
+  verified BOOLEAN DEFAULT 0
+);
+
+CREATE TABLE queue (
+  queue_id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  service VARCHAR(50) NOT NULL,
+  Ticket_num VARCHAR(30) NOT NULL,
+  reason TEXT,
+  joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);

@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 
 dotenv.config();
 const app = express();
-const PORT = 8000;
+const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -16,14 +16,20 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '',
-  database: 'queue_manager'
+  password: 'Admin123@Matt',
+  database: 'queue_manager',
+  port: 3306
 });
 
+
 db.connect(err => {
-  if (err) throw err;
+  if (err) {
+    console.error('❌ MySQL connection failed:', err.message);
+    return;
+  }
   console.log('✅ Connected to MySQL');
 });
+
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -117,15 +123,18 @@ app.post('/api/queue', authenticateToken, (req, res) => {
   if (!name || !phone || !service)
     return res.status(400).json({ success: false, message: 'Name, phone, and service are required' });
 
-  const sql = `INSERT INTO queue (user_id, name, phone, service, reason, joined_at)
-               VALUES (?, ?, ?, ?, ?, NOW())`;
+  // Generate ticket number
+  const ticketNumber = `${service.substring(0, 3).toUpperCase()}-${Date.now().toString().slice(-5)}`;
 
-  db.query(sql, [userId, name, phone, service, reason], (err) => {
+  const sql = `INSERT INTO queue (user_id, name, phone, service, reason, joined_at, Ticket_num)
+               VALUES (?, ?, ?, ?, ?, NOW(), ?)`;
+
+  db.query(sql, [userId, name, phone, service, reason, ticketNumber], (err) => {
     if (err) {
       console.error('DB Error:', err);
       return res.status(500).json({ success: false, message: 'Failed to join queue' });
     }
-    res.json({ success: true, message: 'Successfully joined the queue' });
+    res.json({ success: true, message: 'Successfully joined the queue', ticket: ticketNumber });
   });
 });
 

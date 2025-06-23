@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import './ViewQueue.css';
 
-function ViewQueue(){
+function ViewQueue() {
   const [queueData, setQueueData] = useState([]);
 
-  // Simulated fetch - replace with actual API call
   useEffect(() => {
-    const mockData = [
-      { name: 'Jane Doe', service: 'Consultation', joinedAt: '10:10 AM' },
-      { name: 'John Smith', service: 'Check-Up', joinedAt: '10:20 AM' },
-      { name: 'Alice N.', service: 'Dental', joinedAt: '10:25 AM' },
-    ];
+    const fetchQueue = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/queue");
+        const data = await response.json();
+        if (data.success) {
+          // Sort by joined_at ascending to make it FIFO
+          const sortedQueue = data.queue.sort(
+            (a, b) => new Date(a.joined_at) - new Date(b.joined_at)
+          );
+          setQueueData(sortedQueue);
+        } else {
+          console.error("Failed to fetch queue:", data.message);
+        }
+      } catch (error) {
+        console.error("Queue fetch error:", error);
+      }
+    };
 
-    setQueueData(mockData);
+    fetchQueue();
   }, []);
 
   return (
@@ -24,6 +35,7 @@ function ViewQueue(){
           <thead className="table-dark">
             <tr>
               <th>#</th>
+              <th>Ticket</th>
               <th>Patient Name</th>
               <th>Service</th>
               <th>Joined At</th>
@@ -32,16 +44,17 @@ function ViewQueue(){
           <tbody>
             {queueData.length > 0 ? (
               queueData.map((entry, index) => (
-                <tr key={index}>
+                <tr key={entry.queue_id}>
                   <td>{index + 1}</td>
+                  <td>{entry.Ticket_num}</td>
                   <td>{entry.name}</td>
                   <td>{entry.service}</td>
-                  <td>{entry.joinedAt}</td>
+                  <td>{new Date(entry.joined_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="text-center text-muted">No patients in the queue currently.</td>
+                <td colSpan="5" className="text-center text-muted">No patients in the queue currently.</td>
               </tr>
             )}
           </tbody>
@@ -56,7 +69,6 @@ function ViewQueue(){
             <p className="text-muted">[To be calculated based on queue length and clinician availability]</p>
           </div>
         </div>
-
         <div className="col-md-6">
           <div className="card p-3 shadow-sm">
             <h6>Active Clinicians</h6>
@@ -66,6 +78,6 @@ function ViewQueue(){
       </div>
     </div>
   );
-};
+}
 
 export default ViewQueue;
