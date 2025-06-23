@@ -47,6 +47,9 @@ const authenticate = (req, res, next) => {
   }
 };
 
+app.get('/test', (req, res) => {
+  res.send('Server is working!');
+});
 
 // Signup Route
 app.post('/api/signup', async (req, res) => {
@@ -135,6 +138,22 @@ app.post('/api/queue', authenticateToken, (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to join queue' });
     }
     res.json({ success: true, message: 'Successfully joined the queue', ticket: ticketNumber });
+  });
+});
+
+
+app.get('/api/view-queue', (req, res) => {
+  const sql = `SELECT service, Ticket_num, joined_at
+               FROM queue
+               ORDER BY joined_at ASC`;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('DB Fetch Error:', err);
+      return res.status(500).json({ success: false, message: 'Failed to retrieve queue' });
+    }
+
+    res.json({ success: true, queue: results });
   });
 });
 

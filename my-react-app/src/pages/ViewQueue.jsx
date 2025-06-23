@@ -7,24 +7,22 @@ function ViewQueue() {
   useEffect(() => {
     const fetchQueue = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/queue");
+        const response = await fetch("http://localhost:5000/api/view-queue");
         const data = await response.json();
         if (data.success) {
-          // Sort by joined_at ascending to make it FIFO
-          const sortedQueue = data.queue.sort(
-            (a, b) => new Date(a.joined_at) - new Date(b.joined_at)
-          );
-          setQueueData(sortedQueue);
-        } else {
-          console.error("Failed to fetch queue:", data.message);
+          setQueueData(data.queue);
         }
       } catch (error) {
         console.error("Queue fetch error:", error);
       }
     };
-
-    fetchQueue();
+  
+    fetchQueue(); // Initial call
+  
+    const interval = setInterval(fetchQueue, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval); // Cleanup on unmount
   }, []);
+  
 
   return (
     <div className="container queue-status-page py-5 mt-5">
@@ -36,7 +34,6 @@ function ViewQueue() {
             <tr>
               <th>#</th>
               <th>Ticket</th>
-              <th>Patient Name</th>
               <th>Service</th>
               <th>Joined At</th>
             </tr>
@@ -47,7 +44,6 @@ function ViewQueue() {
                 <tr key={entry.queue_id}>
                   <td>{index + 1}</td>
                   <td>{entry.Ticket_num}</td>
-                  <td>{entry.name}</td>
                   <td>{entry.service}</td>
                   <td>{new Date(entry.joined_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</td>
                 </tr>
