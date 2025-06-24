@@ -157,6 +157,44 @@ app.get('/api/view-queue', (req, res) => {
   });
 });
 
+app.post('/api/appointments', authenticateToken, (req, res) => {
+  const { name, phone, department, clinician, date, time, reason } = req.body;
+  const userId = req.user.id;
+
+  const sql = `
+    INSERT INTO appointments (user_id, name, phone, department, clinician, date, time, reason)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [userId, name, phone, department, clinician, date, time, reason], (err) => {
+    if (err) {
+      console.error("DB Insert Error:", err);
+      return res.status(500).json({ success: false, message: "Failed to book appointment." });
+    }
+    res.json({ success: true, message: "Appointment booked successfully." });
+  });
+});
+
+// Get appointment for logged-in user
+app.get('/api/my-appointment', authenticateToken, (req, res) => {
+  const sql = `SELECT * FROM appointments WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`;
+  db.query(sql, [req.user.id], (err, results) => {
+    if (err) return res.status(500).json({ success: false });
+    if (results.length === 0) return res.json({ success: true, appointment: null });
+    res.json({ success: true, appointment: results[0] });
+  });
+});
+
+// Cancel appointment
+app.delete('/api/my-appointment', authenticateToken, (req, res) => {
+  const sql = `DELETE FROM appointments WHERE user_id = ?`;
+  db.query(sql, [req.user.id], (err) => {
+    if (err) return res.status(500).json({ success: false });
+    res.json({ success: true });
+  });
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);

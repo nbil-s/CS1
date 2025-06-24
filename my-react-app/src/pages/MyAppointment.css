@@ -1,0 +1,49 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: #2c3e50;
+  }
+  
+  .card p {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .btn-danger {
+    background-color: #dc3545;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    color: white;
+    border-radius: 5px;
+    font-weight: 500;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c82333;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  .mt-5 {
+    margin-top: 3rem;
+  }
+  

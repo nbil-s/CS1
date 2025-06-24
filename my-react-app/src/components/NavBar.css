@@ -1,24 +1,86 @@
-.navbar {
-    backdrop-filter: blur(8px);
-    background-color: rgba(0, 0, 0, 0.6) !important;
-  }
-  
-  .navbar-brand {
-    font-size: 1.5rem;
-  }
-  
-  .navbar-nav .nav-link {
-    color: #ffffff;
-    margin-right: 1rem;
-    transition: color 0.3s ease-in-out;
-  }
-  
-  .navbar-nav .nav-link:hover {
-    color: #0dcaf0;
-  }
-  
-  .btn-outline-light:hover {
-    color: #000;
-    background-color: #fff;
-  }
-  
+/* General navbar styling */
+.navbar-container {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+}
+
+/* Flexbox layout */
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Brand */
+.navbar-brand {
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: white;
+}
+
+/* Navigation links */
+.navbar-links a {
+  margin-right: 16px;
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.navbar-links a:hover {
+  color: #0dcaf0;
+}
+
+/* Auth buttons */
+.navbar-auth {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-outline, .btn-primary, .btn-danger {
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid white;
+  background: transparent;
+  color: white;
+  transition: background 0.3s, color 0.3s;
+}
+
+.btn-outline:hover {
+  background-color: white;
+  color: black;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #bb2d3b;
+}
+
+/* Optional: space below navbar to prevent overlap */
+body {
+  padding-top: 70px;
+}

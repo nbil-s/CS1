@@ -1,0 +1,43 @@
+.queueup-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.form-control,
+.form-select {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+  font-weight: 500;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
