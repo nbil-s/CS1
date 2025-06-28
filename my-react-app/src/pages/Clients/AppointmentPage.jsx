@@ -11,6 +11,7 @@ function AppointmentPage() {
     time: '',
     reason: ''
   });
+  const { setHasAppointment } = useAuth();
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,7 +33,9 @@ function AppointmentPage() {
 
     const data = await response.json();
     if (data.success) {
+      setHasAppointment(true);
       alert("Appointment booked!");
+      navigate("/my-appointment");
     } else {
       alert(data.message || "Error booking appointment.");
     }

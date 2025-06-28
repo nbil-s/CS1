@@ -1,0 +1,38 @@
+.manage-menu-container {
+  padding: 50px;
+  max-width: 600px;
+  margin: auto;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.1);
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.manage-menu-container h2 {
+  margin-bottom: 10px;
+  font-size: 28px;
+}
+
+.manage-menu-container p {
+  margin-bottom: 30px;
+  color: #555;
+}
+
+.manage-actions button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 15px;
+  font-size: 16px;
+  border: none;
+  background-color: #00b894;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.manage-actions button:hover {
+  background-color: #019470;
+}

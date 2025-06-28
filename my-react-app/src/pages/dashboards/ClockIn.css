@@ -1,0 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+.clockin-wrapper {
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 40px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.clockin-wrapper h2 {
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.clockin-wrapper textarea {
+  width: 100%;
+  height: 100px;
+  resize: none;
+  padding: 12px 15px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s;
+  margin-bottom: 20px;
+}
+
+.clockin-wrapper textarea:focus {
+  border-color: #00b894;
+}
+
+.clockin-wrapper input[type="password"] {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  margin-bottom: 15px;
+  transition: border-color 0.3s;
+}
+
+.clockin-wrapper input[type="password"]:focus {
+  border-color: #00b894;
+}
+
+.clockin-wrapper button {
+  width: 100%;
+  padding: 12px;
+  background: #00b894;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.clockin-wrapper button:hover {
+  background: #019172;
+}
+
+.clockin-wrapper p {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}

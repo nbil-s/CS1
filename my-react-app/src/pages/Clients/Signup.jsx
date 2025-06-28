@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/Authcontext';
+import usePasswordToggle from '../../hooks/usePasswordToggle';
 import './Signup.css';
-import { useAuth } from '../context/AuthContext';
-import usePasswordToggle from '../hooks/usePasswordToggle';
 
 function Signup() {
   const {login} = useAuth();

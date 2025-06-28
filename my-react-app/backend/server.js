@@ -62,6 +62,11 @@ app.post('/api/signup', async (req, res) => {
   const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com'];
   if (!allowedDomains.includes(domain.toLowerCase()))
     return res.status(400).json({ success: false, message: 'Email domain not allowed' });
+  const disallowedDomains = ['clinicqueue.com'];
+  if (disallowedDomains.includes(domain.toLowerCase())) {
+    return res.status(403).json({ success: false, message: 'Registration with this domain is restricted' });
+  }
+
 
   const checkSql = 'SELECT * FROM users WHERE email = ?';
   db.query(checkSql, [email], async (err, results) => {
@@ -92,15 +97,22 @@ app.post('/api/login', (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user.user_id, email: user.email }, process.env.JWT_SECRET || 'defaultsecret', {
-      expiresIn: '2h'
-    });
+    const token = jwt.sign(
+      { id: user.user_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'defaultsecret',
+      { expiresIn: '2h' }
+    );
 
     res.status(200).json({
       success: true,
       message: 'Login successful',
       token,
-      user: { id: user.user_id, name: user.name, email: user.email }
+      user: {
+        id: user.user_id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     });
   });
 });
@@ -194,6 +206,149 @@ app.delete('/api/my-appointment', authenticateToken, (req, res) => {
   });
 });
 
+// Add Staff/Admin User with random password & email trigger
+app.post('/api/admin/add-user', authenticateToken, async (req, res) => {
+  const { name, email, role, phone } = req.body;
+
+  if (!['staff', 'admin'].includes(role)) {
+    return res.status(400).json({ success: false, message: 'Invalid role specified' });
+  }
+
+  if (role === 'staff' && !email.endsWith('@clinicqueue.com')) {
+    return res.status(400).json({ success: false, message: 'Staff email must end with @clinicqueue.com' });
+  }
+
+  if (role === 'admin' && !email.toLowerCase().includes('admin')) {
+    return res.status(400).json({ success: false, message: 'Admin email must include "admin"' });
+  }
+
+  if (!phone) {
+    return res.status(400).json({ success: false, message: 'Phone number is required' });
+  }
+
+  const checkSql = 'SELECT * FROM users WHERE email = ?';
+  db.query(checkSql, [email], async (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Database error' });
+    if (results.length > 0) {
+      return res.status(409).json({ success: false, message: 'Email already exists' });
+    }
+
+    // Generate random default password
+    const randomPassword = Math.random().toString(36).slice(-10);
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+    const insertSql = `INSERT INTO users (name, email, phone, role, password) VALUES (?, ?, ?, ?, ?)`;
+    db.query(insertSql, [name, email, phone, role, hashedPassword], (err) => {
+      if (err) {
+        console.error('Insert Error:', err);
+        return res.status(500).json({ success: false, message: 'User creation failed' });
+      }
+
+      // Optionally send email notification (simulate for now)
+      console.log(`📧 Email sent to ${email} with temp password: ${randomPassword}`);
+
+      res.status(201).json({ success: true, message: 'User added successfully', password: randomPassword });
+    });
+  });
+});
+
+// Admin: Get all staff/admin users
+app.get('/api/admin/users', authenticateToken, (req, res) => {
+  const sql = 'SELECT user_id, name, email, phone, role FROM users WHERE role IN ("staff", "admin")';
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Failed to retrieve users' });
+    res.json({ success: true, users: results });
+  });
+});
+
+app.post('/api/clock-in', authenticateToken, async (req, res) => {
+  const { remarks, password } = req.body;
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  if (!password)
+    return res.status(400).json({ success: false, message: 'Password is required' });
+
+  if (role !== 'staff' && role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'Only staff/admin can clock in' });
+  }
+
+  const getUserSql = 'SELECT * FROM users WHERE user_id = ?';
+  db.query(getUserSql, [userId], async (err, results) => {
+    if (err || results.length === 0) {
+      console.error('User lookup error:', err);
+      return res.status(500).json({ success: false, message: 'User lookup failed' });
+    }
+
+    const user = results[0];
+    const isValid = await bcrypt.compare(password, user.password);
+
+    if (!isValid) {
+      return res.status(403).json({ success: false, message: 'Incorrect password' });
+    }
+
+    // Check for existing clock-in today
+    const checkSql = `
+      SELECT * FROM clockin
+      WHERE user_id = ? AND DATE(timestamp) = CURDATE()
+    `;
+
+    db.query(checkSql, [userId], (err, results) => {
+      if (err) {
+        console.error('Clock-in check error:', err);
+        return res.status(500).json({ success: false, message: 'Database error' });
+      }
+
+      if (results.length > 0) {
+        return res.status(409).json({ success: false, message: 'Already clocked in today' });
+      }
+
+      // Insert new clock-in record
+      const insertSql = `INSERT INTO clockin (user_id, remarks) VALUES (?, ?)`;
+      db.query(insertSql, [userId, remarks || null], (err, result) => {
+        if (err) {
+          console.error('Insert error:', err);
+          return res.status(500).json({ success: false, message: 'Clock-in failed' });
+        }
+
+        res.status(201).json({
+          success: true,
+          message: 'Clock-in successful',
+          record: {
+            id: result.insertId,
+            user_id: userId,
+            timestamp: new Date().toISOString(),
+            remarks: remarks || null
+          }
+        });
+      });
+    });
+  });
+});
+
+app.post('/api/clock-out', authenticateToken, async (req, res) => {
+  const { remarks, password } = req.body;
+  const userId = req.user.id;
+
+});
+
+app.delete('/api/admin/delete-user/:id', authenticateToken, (req, res) => {
+  const userId = req.params.id;
+  const sql = 'DELETE FROM users WHERE user_id = ?';
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error('Delete Error:', err);
+      return res.status(500).json({ success: false, message: 'Deletion failed' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, message: 'User deleted successfully' });
+  });
+});
 
 
 app.listen(PORT, () => {

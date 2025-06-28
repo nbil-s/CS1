@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import NavBar from '../components/NavBar.jsx';
-import clinicBg from '../assets/clinic-bg.jpg'; // Import your image
+import clinicBg from '../../assets/clinic-bg.jpg';
 import './Homepage.css';
 
 function Homepage() {

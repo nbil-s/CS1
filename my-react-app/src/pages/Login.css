@@ -6,7 +6,6 @@
     min-height: 100vh;
     background: rgb(218, 206, 206);
     font-family: "Poppins", sans-serif;
-    background: url(../images/MDC.jpg) no-repeat;
     background-size: cover;
     background-position: center;
     position: relative;
@@ -55,6 +54,7 @@
 
 .input-box i{
     position: absolute;
+    padding-top: 50px;
     right: 20px;
     top: 25px;
     transform: translateY(-50%);

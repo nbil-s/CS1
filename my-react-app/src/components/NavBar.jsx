@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/Authcontext';
 import './NavBar.css';
 
 const NavBar = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, hasAppointment, logout, userRole } = useAuth();
+
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -12,18 +13,66 @@ const NavBar = () => {
     navigate('/');
   };
 
+  useEffect(() => {
+    const fetchAppointmentStatus = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/my-appointment', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const data = await response.json();
+        if (data.success && data.appointment) {
+          setHasAppointment(true);
+        }
+      } catch (error) {
+        console.error("Error checking appointment status", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchAppointmentStatus();
+    }
+  }, [isAuthenticated]);
+
   return (
     <header className="navbar-container">
       <div className="navbar-content">
         <Link to="/" className="navbar-brand">ClinicQueue</Link>
         <nav className="navbar-links">
-          <Link to="/">Home</Link>
-          {isAuthenticated && (
+          {isAuthenticated && userRole === "admin" && (
             <>
+              <Link to="/admin/dashboard">Home</Link>
+              <Link to="/admin/manageusers">Manage Users</Link>
+              <Link to="/admin-staff/clock-in">Clock In</Link>
+              <Link to="/admin/system-settings">System Settings</Link>
+              <Link to="/admin/reports">Reports</Link>
+              <Link to="/admin/audit-logs">Audit Logs</Link>
+            </>
+          )}
+          {isAuthenticated && userRole === "patient" && (
+            <>
+              <Link to="/">Home</Link>
               <Link to="/view-queue">View Queue</Link>
-              <Link to="/appointment-page">Appointment</Link>
+              <Link to={hasAppointment ? "/my-appointment" : "/appointment-page"}>
+                  {hasAppointment ? "My Appointment" : "Appointment"}
+              </Link>
               <Link to="/queue-up">Queue Up</Link>
               <Link to="/my-details">My Details</Link>
+            </>
+          )}
+          {isAuthenticated && userRole === "staff" && (
+            <>
+              <Link to="/staff/dashboard">Home</Link>
+              <Link to="/admin-staff/clock-in">Clock In</Link>
+              <Link to="/staff/manage-appointments">Appointments</Link>
+              <Link to="/staff/queue-management">Queue Management</Link>
+              <Link to="/staff/patient-records">Patient Records</Link>
+              <Link to="/staff/consultations">Consultations</Link>
             </>
           )}
         </nav>

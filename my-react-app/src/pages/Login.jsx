@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/Authcontext';
 import './Login.css';
 
 function Login() {
@@ -14,6 +13,8 @@ function Login() {
     e.preventDefault();
 
     const credentials = { email, password };
+    console.log('Sending credentials:', credentials);
+
 
     try {
         const response = await fetch('http://localhost:5000/api/login', {
@@ -26,8 +27,17 @@ function Login() {
 
         if (data.success) {
           localStorage.setItem('token', data.token);
-          login(data.token);
-          navigate('/');
+          localStorage.setItem('userRole', data.user.role);
+          login(data.token, data.user.role);
+          
+
+          if (data.user.role === 'admin') {
+            navigate('/admin/dashboard');
+          } else if (data.user.role === 'staff') {
+            navigate('/staff/dashboard');
+          } else {
+            navigate('/'); // Patient homepage
+          }
         } else {
         alert(data.message);
         }
