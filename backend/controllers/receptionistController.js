@@ -1,4 +1,5 @@
 const { Appointment, User } = require('../models');
+const { createNotification } = require('./notificationController');
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -78,7 +79,9 @@ exports.assignDoctor = async (req, res) => {
         return res.status(400).json({ message: 'Doctor ID is required' });
       }
 
-      const appointment = await Appointment.findByPk(appointmentId);
+      const appointment = await Appointment.findByPk(appointmentId, {
+        include: [{ model: User, as: 'patient' }]
+      });
       
       if (!appointment) {
         return res.status(404).json({ message: 'Appointment not found' });
@@ -94,6 +97,16 @@ exports.assignDoctor = async (req, res) => {
         doctorId,
         status: 'confirmed'
       });
+
+      // Create notification for doctor assignment
+      await createNotification(
+        appointment.patientId,
+        'appointment',
+        'Doctor Assigned',
+        `Dr. ${doctor.name} has been assigned to your appointment for ${new Date(appointment.appointmentDate).toLocaleDateString()} at ${appointment.appointmentTime}. Your appointment is now confirmed.`,
+        appointment.id,
+        'appointment'
+      );
 
       res.json({ 
         message: 'Doctor assigned successfully', 
@@ -113,13 +126,41 @@ exports.updateAppointmentStatus = async (req, res) => {
       const { appointmentId } = req.params;
       const { status } = req.body;
 
-      const appointment = await Appointment.findByPk(appointmentId);
+      const appointment = await Appointment.findByPk(appointmentId, {
+        include: [{ model: User, as: 'patient' }]
+      });
       
       if (!appointment) {
         return res.status(404).json({ message: 'Appointment not found' });
       }
 
       await appointment.update({ status });
+
+      // Create notification for status update
+      let notificationTitle, notificationMessage;
+      switch (status) {
+        case 'cancelled':
+          notificationTitle = 'Appointment Cancelled';
+          notificationMessage = `Your appointment for ${new Date(appointment.appointmentDate).toLocaleDateString()} at ${appointment.appointmentTime} has been cancelled by the receptionist`;
+          break;
+        case 'completed':
+          notificationTitle = 'Appointment Completed';
+          notificationMessage = `Your appointment for ${new Date(appointment.appointmentDate).toLocaleDateString()} at ${appointment.appointmentTime} has been marked as completed`;
+          break;
+        default:
+          notificationTitle = 'Appointment Updated';
+          notificationMessage = `Your appointment status has been updated to: ${status}`;
+      }
+
+      await createNotification(
+        appointment.patientId,
+        'appointment',
+        notificationTitle,
+        notificationMessage,
+        appointment.id,
+        'appointment'
+      );
+
       res.json({ message: 'Appointment status updated', appointment });
     });
   } catch (error) {

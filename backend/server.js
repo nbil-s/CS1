@@ -7,6 +7,8 @@ const doctorRoutes = require('./routes/doctorRoutes');
 const receptionistRoutes = require('./routes/receptionistRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const queueRoutes = require('./routes/queueRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -30,6 +32,8 @@ app.use('/api/doctor', doctorRoutes);
 app.use('/api/receptionist', receptionistRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {

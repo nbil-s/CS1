@@ -1,4 +1,5 @@
 const { Queue, User } = require('../models');
+const { createNotification } = require('./notificationController');
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -75,6 +76,16 @@ exports.addToQueue = async (req, res) => {
         notes
       });
 
+      // Create notification for patient
+      await createNotification(
+        patientId,
+        'queue',
+        'Added to Queue',
+        `You have been added to the queue with number ${nextNumber}. Estimated wait time: ${estimatedWait} minutes.`,
+        queueEntry.id,
+        'queue'
+      );
+
       res.status(201).json({ 
         message: 'Patient added to queue', 
         queueEntry 
@@ -93,13 +104,49 @@ exports.updateQueueStatus = async (req, res) => {
       const { queueId } = req.params;
       const { status } = req.body;
 
-      const queueEntry = await Queue.findByPk(queueId);
+      const queueEntry = await Queue.findByPk(queueId, {
+        include: [{ model: User, as: 'patient' }]
+      });
       
       if (!queueEntry) {
         return res.status(404).json({ message: 'Queue entry not found' });
       }
 
       await queueEntry.update({ status });
+
+      // Create notification for status change
+      let notificationTitle, notificationMessage;
+      switch (status) {
+        case 'called':
+          notificationTitle = 'Your Turn!';
+          notificationMessage = `Queue number ${queueEntry.queueNumber}: Please proceed to see the doctor.`;
+          break;
+        case 'in-consultation':
+          notificationTitle = 'Consultation Started';
+          notificationMessage = `Your consultation has begun. Queue number: ${queueEntry.queueNumber}`;
+          break;
+        case 'completed':
+          notificationTitle = 'Consultation Completed';
+          notificationMessage = `Your consultation has been completed. Thank you for visiting!`;
+          break;
+        case 'cancelled':
+          notificationTitle = 'Queue Cancelled';
+          notificationMessage = `Your queue entry (number ${queueEntry.queueNumber}) has been cancelled.`;
+          break;
+        default:
+          notificationTitle = 'Queue Status Updated';
+          notificationMessage = `Your queue status has been updated to: ${status}`;
+      }
+
+      await createNotification(
+        queueEntry.patientId,
+        'queue',
+        notificationTitle,
+        notificationMessage,
+        queueEntry.id,
+        'queue'
+      );
+
       res.json({ message: 'Queue status updated', queueEntry });
     });
   } catch (error) {
@@ -134,11 +181,23 @@ exports.removeFromQueue = async (req, res) => {
     verifyToken(req, res, async () => {
       const { queueId } = req.params;
 
-      const queueEntry = await Queue.findByPk(queueId);
+      const queueEntry = await Queue.findByPk(queueId, {
+        include: [{ model: User, as: 'patient' }]
+      });
       
       if (!queueEntry) {
         return res.status(404).json({ message: 'Queue entry not found' });
       }
+
+      // Create notification before removing
+      await createNotification(
+        queueEntry.patientId,
+        'queue',
+        'Removed from Queue',
+        `You have been removed from the queue (number ${queueEntry.queueNumber}).`,
+        queueEntry.id,
+        'queue'
+      );
 
       await queueEntry.destroy();
       res.json({ message: 'Patient removed from queue' });
