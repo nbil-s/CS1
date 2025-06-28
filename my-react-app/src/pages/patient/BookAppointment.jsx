@@ -67,24 +67,30 @@ export default function BookAppointment() {
   };
 
   const handleBook = async () => {
-    if (!selectedDate || !selectedTime || !selectedDoctor) {
-      alert('Please select a date, time, and doctor');
+    if (!selectedDate || !selectedTime) {
+      alert('Please select a date and time');
       return;
     }
 
     setLoading(true);
     try {
-      const datetime = `${selectedDate}T${selectedTime}`;
-      await api.post('/patient/appointments', { 
-        datetime,
-        doctor: selectedDoctor,
-        type: appointmentType,
-        notes 
-      });
-      alert('Appointment booked successfully!');
-      navigate('/patient/dashboard');
+      // Format the data to match our backend API
+      const appointmentData = {
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTime,
+        reason: `${appointmentType} - ${notes || 'No additional notes'}`
+      };
+
+      const response = await api.post('/patient/appointments', appointmentData);
+      
+      if (response.data.message) {
+        alert('Appointment booked successfully!');
+        navigate('/patient/dashboard');
+      }
     } catch (err) {
-      alert('Failed to book appointment. Please try again.');
+      console.error('Booking error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to book appointment. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -226,7 +232,7 @@ export default function BookAppointment() {
             <button 
               className="book-button"
               onClick={handleBook}
-              disabled={loading || !selectedDate || !selectedTime || !selectedDoctor}
+              disabled={loading || !selectedDate || !selectedTime}
             >
               {loading ? 'Booking...' : 'Book Appointment'}
             </button>
