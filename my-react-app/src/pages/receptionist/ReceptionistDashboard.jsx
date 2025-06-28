@@ -17,9 +17,12 @@ export default function ReceptionistDashboard() {
   const fetchAppointments = async () => {
     try {
       const response = await api.get(`/receptionist/appointments?date=${selectedDate}`);
-      setAppointments(response.data);
+      console.log('API Response:', response.data);
+      console.log('Appointments data:', response.data.appointments);
+      setAppointments(response.data.appointments || []);
       setLoading(false);
     } catch (err) {
+      console.error('Fetch appointments error:', err);
       setError('Failed to fetch appointments');
       setLoading(false);
     }
@@ -28,8 +31,11 @@ export default function ReceptionistDashboard() {
   const fetchDoctors = async () => {
     try {
       const response = await api.get('/receptionist/doctors');
-      setDoctors(response.data);
+      console.log('Doctors API Response:', response.data);
+      console.log('Doctors data:', response.data.doctors);
+      setDoctors(response.data.doctors || []);
     } catch (err) {
+      console.error('Fetch doctors error:', err);
       setError('Failed to fetch doctors');
     }
   };
@@ -73,64 +79,76 @@ export default function ReceptionistDashboard() {
       <div className="stats">
         <div className="stat-card">
           <h3>Total Appointments</h3>
-          <p>{appointments.length}</p>
+          <p>{Array.isArray(appointments) ? appointments.length : 0}</p>
         </div>
         <div className="stat-card">
           <h3>Pending</h3>
-          <p>{appointments.filter(apt => apt.status === 'pending').length}</p>
+          <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'pending').length : 0}</p>
         </div>
         <div className="stat-card">
-          <h3>Assigned</h3>
-          <p>{appointments.filter(apt => apt.status === 'assigned').length}</p>
+          <h3>Confirmed</h3>
+          <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'confirmed').length : 0}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Completed</h3>
+          <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'completed').length : 0}</p>
         </div>
       </div>
 
       <div className="appointments-section">
         <h2>Appointments for {new Date(selectedDate).toLocaleDateString()}</h2>
         <div className="appointments-list">
-          {appointments.map(appointment => (
-            <div key={appointment.id} className="appointment-card">
-              <div className="appointment-info">
-                <h3>Patient: {appointment.patientName}</h3>
-                <p>Time: {new Date(appointment.datetime).toLocaleTimeString()}</p>
-                <p>Status: <span className={`status ${appointment.status}`}>{appointment.status}</span></p>
-                {appointment.doctorName && <p>Doctor: {appointment.doctorName}</p>}
-              </div>
-              <div className="appointment-actions">
-                {appointment.status === 'pending' && (
-                  <div className="assign-doctor">
-                    <select
-                      onChange={(e) => handleAssignDoctor(appointment.id, e.target.value)}
-                      defaultValue=""
+          {Array.isArray(appointments) && appointments.length > 0 ? (
+            appointments.map(appointment => (
+              <div key={appointment.id} className="appointment-card">
+                <div className="appointment-info">
+                  <h3>Patient: {appointment.patient?.name || 'Unknown'}</h3>
+                  <p>Time: {appointment.appointmentTime}</p>
+                  <p>Date: {new Date(appointment.appointmentDate).toLocaleDateString()}</p>
+                  <p>Status: <span className={`status ${appointment.status}`}>{appointment.status}</span></p>
+                  {appointment.doctor && <p>Doctor: {appointment.doctor.name}</p>}
+                  {appointment.reason && <p>Reason: {appointment.reason}</p>}
+                </div>
+                <div className="appointment-actions">
+                  {appointment.status === 'pending' && (
+                    <div className="assign-doctor">
+                      <select
+                        onChange={(e) => handleAssignDoctor(appointment.id, e.target.value)}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Select Doctor</option>
+                        {Array.isArray(doctors) && doctors.map(doctor => (
+                          <option key={doctor.id} value={doctor.id}>
+                            {doctor.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {appointment.status === 'confirmed' && (
+                    <button 
+                      className="btn-complete"
+                      onClick={() => handleStatusUpdate(appointment.id, 'completed')}
                     >
-                      <option value="" disabled>Select Doctor</option>
-                      {doctors.map(doctor => (
-                        <option key={doctor.id} value={doctor.id}>
-                          Dr. {doctor.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {appointment.status === 'assigned' && (
-                  <button 
-                    className="btn-complete"
-                    onClick={() => handleStatusUpdate(appointment.id, 'completed')}
-                  >
-                    Mark Complete
-                  </button>
-                )}
-                {appointment.status === 'pending' && (
-                  <button 
-                    className="btn-cancel"
-                    onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
-                  >
-                    Cancel
-                  </button>
-                )}
+                      Mark Complete
+                    </button>
+                  )}
+                  {appointment.status === 'pending' && (
+                    <button 
+                      className="btn-cancel"
+                      onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="no-appointments">
+              <p>No appointments found for this date.</p>
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
