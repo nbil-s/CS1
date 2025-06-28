@@ -44,17 +44,7 @@ const NavBar = () => {
       <div className="navbar-content">
         <Link to="/" className="navbar-brand">ClinicQueue</Link>
         <nav className="navbar-links">
-          {isAuthenticated && userRole === "admin" && (
-            <>
-              <Link to="/admin/dashboard">Home</Link>
-              <Link to="/admin/manageusers">Manage Users</Link>
-              <Link to="/admin-staff/clock-in">Clock In</Link>
-              <Link to="/admin/system-settings">System Settings</Link>
-              <Link to="/admin/reports">Reports</Link>
-              <Link to="/admin/audit-logs">Audit Logs</Link>
-            </>
-          )}
-          {isAuthenticated && userRole === "patient" && (
+        {isAuthenticated && userRole === "patient" && (
             <>
               <Link to="/">Home</Link>
               <Link to="/view-queue">View Queue</Link>
@@ -65,16 +55,29 @@ const NavBar = () => {
               <Link to="/my-details">My Details</Link>
             </>
           )}
-          {isAuthenticated && userRole === "staff" && (
-            <>
-              <Link to="/staff/dashboard">Home</Link>
-              <Link to="/admin-staff/clock-in">Clock In</Link>
-              <Link to="/staff/manage-appointments">Appointments</Link>
-              <Link to="/staff/queue-management">Queue Management</Link>
-              <Link to="/staff/patient-records">Patient Records</Link>
-              <Link to="/staff/consultations">Consultations</Link>
-            </>
-          )}
+          {isAuthenticated && userRole === "admin" && (
+  <>
+    <Link to="/admin/dashboard">Home</Link>
+    <Link to="/admin/manageusers">Manage Users</Link>
+    <Link to="/admin-staff/clock-in">Clock In</Link>
+    <Link to="/admin-staff/clock-out">Clock Out</Link>
+    <Link to="/admin/reports">Reports</Link>
+    <Link to="/admin/audit-logs">Audit Logs</Link>
+  </>
+)}
+
+{isAuthenticated && userRole === "staff" && (
+  <>
+    <Link to="/staff/dashboard">Home</Link>
+    <Link to="/admin-staff/clock-in">Clock In</Link>
+    <Link to="/admin-staff/clock-out">Clock Out</Link>
+    <Link to="/staff/manage-appointments">Appointments</Link>
+    <Link to="/staff/queue-management">Queue Management</Link>
+    <Link to="/staff/patient-records">Patient Records</Link>
+    <Link to="/staff/consultations">Consultations</Link>
+  </>
+)}
+
         </nav>
         <div className="navbar-auth">
           {!isAuthenticated ? (

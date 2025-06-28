@@ -7,6 +7,7 @@ import Signup from './pages/Clients/Signup.jsx';
 import QueueUp from './pages/Clients/QueueUp.jsx';
 import Homepage from './pages/Clients/HomePage.jsx';
 import ClockIn from './pages/dashboards/ClockIn.jsx';
+import ClockOut from './pages/dashboards/ClockOut.jsx';
 import ViewQueue from './pages/Clients/ViewQueue.jsx';
 import Prescriptions from './pages/patient/Prescriptions';
 import MedicalRecords from './pages/patient/MedicalRecords';
@@ -32,11 +33,12 @@ function App() {
         <Route path="/view-queue" element={<ViewQueue />} />
         <Route path="/prescriptions" element={<Prescriptions />} />
         <Route path="/my-appointment" element={<MyAppointment />} />
+        <Route path="/admin-staff/clock-in" element={<ClockIn />} />
+        <Route path="/admin-staff/clock-out" element={<ClockOut />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
         <Route path="/appointment-page" element={<AppointmentPage />} />
         <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
         <Route path="/patient/dashboard" element={<PatientDashboard />} />
-        <Route path="/admin-staff/clock-in" element={<ClockIn />} />
         <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
         <Route path="/admin/manageusers"element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
         <Route path="/admin/dashboard"element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

@@ -266,61 +266,25 @@ app.post('/api/clock-in', authenticateToken, async (req, res) => {
   const userId = req.user.id;
   const role = req.user.role;
 
-  if (!password)
-    return res.status(400).json({ success: false, message: 'Password is required' });
+  if (!password) return res.status(400).json({ success: false, message: 'Password is required' });
+  if (!['staff', 'admin'].includes(role)) return res.status(403).json({ success: false, message: 'Access denied' });
 
-  if (role !== 'staff' && role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'Only staff/admin can clock in' });
-  }
+  db.query('SELECT * FROM users WHERE user_id = ?', [userId], async (err, results) => {
+    if (err || results.length === 0) return res.status(500).json({ success: false, message: 'User not found' });
 
-  const getUserSql = 'SELECT * FROM users WHERE user_id = ?';
-  db.query(getUserSql, [userId], async (err, results) => {
-    if (err || results.length === 0) {
-      console.error('User lookup error:', err);
-      return res.status(500).json({ success: false, message: 'User lookup failed' });
-    }
+    const valid = await bcrypt.compare(password, results[0].password);
+    if (!valid) return res.status(403).json({ success: false, message: 'Incorrect password' });
 
-    const user = results[0];
-    const isValid = await bcrypt.compare(password, user.password);
+    const checkSql = 'SELECT * FROM attendance WHERE user_id = ? AND date = CURDATE()';
+    db.query(checkSql, [userId], (err, rows) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error' });
 
-    if (!isValid) {
-      return res.status(403).json({ success: false, message: 'Incorrect password' });
-    }
+      if (rows.length > 0) return res.status(409).json({ success: false, message: 'Already clocked in today' });
 
-    // Check for existing clock-in today
-    const checkSql = `
-      SELECT * FROM clockin
-      WHERE user_id = ? AND DATE(timestamp) = CURDATE()
-    `;
-
-    db.query(checkSql, [userId], (err, results) => {
-      if (err) {
-        console.error('Clock-in check error:', err);
-        return res.status(500).json({ success: false, message: 'Database error' });
-      }
-
-      if (results.length > 0) {
-        return res.status(409).json({ success: false, message: 'Already clocked in today' });
-      }
-
-      // Insert new clock-in record
-      const insertSql = `INSERT INTO clockin (user_id, remarks) VALUES (?, ?)`;
+      const insertSql = 'INSERT INTO attendance (user_id, clockin_time, remarks) VALUES (?, NOW(), ?)';
       db.query(insertSql, [userId, remarks || null], (err, result) => {
-        if (err) {
-          console.error('Insert error:', err);
-          return res.status(500).json({ success: false, message: 'Clock-in failed' });
-        }
-
-        res.status(201).json({
-          success: true,
-          message: 'Clock-in successful',
-          record: {
-            id: result.insertId,
-            user_id: userId,
-            timestamp: new Date().toISOString(),
-            remarks: remarks || null
-          }
-        });
+        if (err) return res.status(500).json({ success: false, message: 'Clock-in failed' });
+        res.status(201).json({ success: true, message: 'Clock-in successful' });
       });
     });
   });
@@ -329,8 +293,35 @@ app.post('/api/clock-in', authenticateToken, async (req, res) => {
 app.post('/api/clock-out', authenticateToken, async (req, res) => {
   const { remarks, password } = req.body;
   const userId = req.user.id;
+  const role = req.user.role;
 
+  if (!password) return res.status(400).json({ success: false, message: 'Password is required' });
+  if (!['staff', 'admin'].includes(role)) return res.status(403).json({ success: false, message: 'Access denied' });
+
+  db.query('SELECT * FROM users WHERE user_id = ?', [userId], async (err, results) => {
+    if (err || results.length === 0) return res.status(500).json({ success: false, message: 'User not found' });
+
+    const valid = await bcrypt.compare(password, results[0].password);
+    if (!valid) return res.status(403).json({ success: false, message: 'Incorrect password' });
+
+    const checkSql = 'SELECT * FROM attendance WHERE user_id = ? AND date = CURDATE()';
+    db.query(checkSql, [userId], (err, rows) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error' });
+
+      if (rows.length === 0) return res.status(400).json({ success: false, message: 'Clock-in required before clocking out' });
+
+      const record = rows[0];
+      if (record.clockout_time) return res.status(409).json({ success: false, message: 'Already clocked out today' });
+
+      const updateSql = 'UPDATE attendance SET clockout_time = NOW(), remarks = ? WHERE attendance_id = ?';
+      db.query(updateSql, [remarks || record.remarks, record.attendance_id], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Clock-out failed' });
+        res.json({ success: true, message: 'Clock-out successful' });
+      });
+    });
+  });
 });
+
 
 app.delete('/api/admin/delete-user/:id', authenticateToken, (req, res) => {
   const userId = req.params.id;

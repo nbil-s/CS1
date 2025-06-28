@@ -63,17 +63,17 @@ VALUES (
 );
 
 USE queue_manager;
-CREATE TABLE clockin (
-  clockin_id INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE attendance (
+  attendance_id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  clockin_time DATETIME DEFAULT NULL,
+  clockout_time DATETIME DEFAULT NULL,
   remarks TEXT,
-  FOREIGN KEY (user_id) REFERENCES users(user_id)
-    ON DELETE CASCADE
+  date DATE GENERATED ALWAYS AS (DATE(clockin_time)) STORED,
+  UNIQUE KEY unique_attendance (user_id, date),
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
-ALTER TABLE clockin ADD clockin_date DATE GENERATED ALWAYS AS (DATE(timestamp)) STORED;
-ALTER TABLE clockin ADD UNIQUE KEY unique_user_date (user_id, clockin_date);
 
 
 

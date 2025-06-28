@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import './ClockIn_Out.css';
 
-const ClockIn = () => {
+const ClockOut = () => {
   const [remarks, setRemarks] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleClockIn = async () => {
+  const handleClockOut = async () => {
     setMessage('');
     if (!password) {
       setMessage('Password is required to confirm.');
@@ -14,7 +14,7 @@ const ClockIn = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/clock-in', {
+      const res = await fetch('http://localhost:5000/api/clock-out', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ const ClockIn = () => {
 
       const data = await res.json();
       if (data.success) {
-        setMessage('✅ Clock-In successful');
+        setMessage('✅ Clock-Out successful');
       } else {
         setMessage('❌ ' + data.message);
       }
@@ -36,7 +36,7 @@ const ClockIn = () => {
 
   return (
     <div className="clockin-wrapper">
-      <h2>Clock In</h2>
+      <h2>Clock Out</h2>
       <textarea
         placeholder="Optional remarks..."
         value={remarks}
@@ -48,10 +48,10 @@ const ClockIn = () => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleClockIn}>Confirm Clock-In</button>
+      <button onClick={handleClockOut}>Confirm Clock-Out</button>
       {message && <p>{message}</p>}
     </div>
   );
 };
 
-export default ClockIn;
+export default ClockOut;
