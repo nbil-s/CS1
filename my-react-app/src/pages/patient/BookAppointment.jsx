@@ -46,7 +46,13 @@ export default function BookAppointment() {
       const isCurrentMonth = date.getMonth() === month;
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
-      const isSelected = selectedDate === date.toISOString().split('T')[0];
+      
+      // Fix date comparison for selection
+      const dateYear = date.getFullYear();
+      const dateMonth = String(date.getMonth() + 1).padStart(2, '0');
+      const dateDay = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${dateYear}-${dateMonth}-${dateDay}`;
+      const isSelected = selectedDate === formattedDate;
       
       days.push({
         date,
@@ -62,7 +68,14 @@ export default function BookAppointment() {
 
   const handleDateSelect = (date) => {
     if (date < new Date()) return; // Can't select past dates
-    setSelectedDate(date.toISOString().split('T')[0]);
+    
+    // Fix timezone issue by creating date in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    setSelectedDate(formattedDate);
     setSelectedTime(''); // Reset time when date changes
   };
 

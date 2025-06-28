@@ -9,11 +9,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .dashboard-header h1 {
   color: #8B4513;
   font-size: 2.5rem;
+}
+
+/* Tab Navigation Styles */
+.tab-navigation {
+  display: flex;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+  background: #e9ecef;
+  color: #8B4513;
+}
+
+.tab-button.active {
+  background: #8B4513;
+  color: white;
 }
 
 .date-filter {
@@ -120,7 +152,7 @@
   color: #856404;
 }
 
-.status.assigned {
+.status.confirmed {
   background: #d4edda;
   color: #155724;
 }
@@ -133,6 +165,21 @@
 .status.cancelled {
   background: #f8d7da;
   color: #721c24;
+}
+
+.status.waiting {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.called {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status.in-consultation {
+  background: #d4edda;
+  color: #155724;
 }
 
 .appointment-actions {
@@ -182,6 +229,139 @@
   background: #c82333;
 }
 
+/* Queue Management Styles */
+.queue-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.queue-section h2 {
+  color: #8B4513;
+  margin-bottom: 1.5rem;
+}
+
+.add-to-queue-form {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border: 2px dashed #8B4513;
+}
+
+.add-to-queue-form h3 {
+  color: #8B4513;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.form-select {
+  padding: 0.75rem;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  color: #333;
+  font-size: 1rem;
+  min-width: 250px;
+  background: white;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #8B4513;
+}
+
+.queue-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.queue-list {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.queue-list h3 {
+  color: #8B4513;
+  margin-bottom: 1rem;
+}
+
+.queue-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #8B4513;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.queue-info h4 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.queue-info p {
+  color: #666;
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.queue-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.queue-actions select {
+  padding: 0.5rem;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  color: #333;
+  font-size: 0.9rem;
+  min-width: 150px;
+}
+
+.queue-actions select:focus {
+  outline: none;
+  border-color: #8B4513;
+}
+
+.btn-remove {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  background: #dc3545;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-remove:hover {
+  background: #c82333;
+}
+
+.no-appointments,
+.queue-list p {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  font-style: italic;
+}
+
 .loading {
   text-align: center;
   padding: 2rem;
@@ -204,21 +384,33 @@
 
   .dashboard-header {
     flex-direction: column;
-    gap: 1rem;
     align-items: flex-start;
   }
 
-  .appointment-card {
+  .dashboard-header h1 {
+    font-size: 2rem;
+  }
+
+  .tab-navigation {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .appointment-card,
+  .queue-item {
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
   }
 
-  .appointment-actions {
+  .appointment-actions,
+  .queue-actions {
     width: 100%;
-    flex-direction: column;
+    justify-content: flex-start;
   }
 
-  .assign-doctor select {
-    width: 100%;
+  .stats,
+  .queue-stats {
+    grid-template-columns: 1fr;
   }
 } 

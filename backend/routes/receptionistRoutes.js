@@ -1,25 +1,28 @@
 const express = require('express');
+const { 
+  getPendingAppointments, 
+  getDoctors, 
+  assignDoctor, 
+  updateAppointmentStatus 
+} = require('../controllers/receptionistController');
+const { 
+  getQueueManagement, 
+  addToQueue, 
+  updateQueueStatus, 
+  removeFromQueue 
+} = require('../controllers/queueController');
 const router = express.Router();
 
-// Placeholder routes for receptionist functionality
-router.get('/appointments', (req, res) => {
-  // TODO: Implement actual appointment fetching logic
-  res.json({ appointments: [] });
-});
+// Receptionist appointment management routes
+router.get('/appointments', getPendingAppointments);
+router.get('/doctors', getDoctors);
+router.put('/appointments/:appointmentId/assign', assignDoctor);
+router.put('/appointments/:appointmentId', updateAppointmentStatus);
 
-router.get('/doctors', (req, res) => {
-  // TODO: Implement actual doctor fetching logic
-  res.json({ doctors: [] });
-});
-
-router.put('/appointments/:id/assign', (req, res) => {
-  // TODO: Implement actual appointment assignment logic
-  res.json({ message: 'Appointment assigned' });
-});
-
-router.put('/appointments/:id', (req, res) => {
-  // TODO: Implement actual appointment update logic
-  res.json({ message: 'Appointment updated' });
-});
+// Receptionist queue management routes
+router.get('/queue', getQueueManagement);
+router.post('/queue/add', addToQueue);
+router.put('/queue/:queueId/status', updateQueueStatus);
+router.delete('/queue/:queueId', removeFromQueue);
 
 module.exports = router; 

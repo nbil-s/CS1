@@ -1,15 +1,13 @@
 const express = require('express');
 const { createAppointment, getPatientAppointments } = require('../controllers/appointmentController');
+const { getCurrentQueue } = require('../controllers/queueController');
 const router = express.Router();
 
 // Patient appointment routes
 router.post('/appointments', createAppointment);
 router.get('/appointments', getPatientAppointments);
 
-// Placeholder routes for other patient functionality
-router.get('/queue', (req, res) => {
-  // TODO: Implement actual queue fetching logic
-  res.json({ queue: [] });
-});
+// Patient queue routes
+router.get('/queue', getCurrentQueue);
 
 module.exports = router; 
