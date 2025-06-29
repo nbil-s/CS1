@@ -56,6 +56,20 @@ export default function Queue() {
         <p className="last-updated">Last updated: {new Date().toLocaleTimeString()}</p>
       </div>
 
+      {/* Prominent Queue Number Display */}
+      {queueData.currentPatient && (
+        <div className="queue-number-display">
+          <div className="queue-number-card">
+            <div className="queue-number-icon">🎫</div>
+            <div className="queue-number-content">
+              <h2>Your Queue Number</h2>
+              <div className="queue-number-value">#{queueData.currentPatient.queueNumber}</div>
+              <p className="queue-number-status">Status: {queueData.currentPatient.status}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="queue-status">
         <div className="status-card">
           <div className="status-icon">🎯</div>

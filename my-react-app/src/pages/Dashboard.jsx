@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import PatientDashboard from './dashboards/PatientDashboard';
 import DoctorDashboard from './dashboards/DoctorDashboard';
 import ReceptionistDashboard from './dashboards/ReceptionistDashboard';
@@ -7,15 +8,15 @@ import AdminDashboard from './dashboards/AdminDashboard';
 import './Dashboard.css';
 
 export default function Dashboard() {
-  const role = localStorage.getItem('role');
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  if (!role) {
+  if (!user) {
     navigate('/login');
     return null;
   }
 
-  switch (role) {
+  switch (user.role) {
     case 'patient':
       return <PatientDashboard />;
     case 'doctor':

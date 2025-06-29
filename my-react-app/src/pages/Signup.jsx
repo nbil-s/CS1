@@ -36,19 +36,23 @@ function Signup() {
         setLoading(true);
 
         try {
+            // Register the user
             const response = await api.post('/auth/register', {
-                username: formData.username,
+                name: formData.username,
                 email: formData.email,
-                password: formData.password,
-                role: 'patient' // Default role
+                password: formData.password
             });
 
-            if (response.data.success) {
+            if (response.data) {
+                console.log('Registration successful!');
+                // Show success message and redirect to login
+                alert('Registration successful! Please log in with your new account.');
                 navigate('/login');
             }
         } catch (err) {
             console.error('Registration error:', err);
             if (err.response) {
+                console.log('Error response:', err.response.data);
                 setError(err.response.data.message || 'Registration failed');
             } else if (err.request) {
                 setError('Network error. Please check your connection.');
