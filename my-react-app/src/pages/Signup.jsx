@@ -68,7 +68,8 @@ function Signup() {
         <div className="body">
             <div className='wrapper'>
                 <form onSubmit={handleSubmit}>
-                    <h1>Register</h1>
+                    <h1>Welcome</h1>
+                    <p>Please fill in the details to register</p>
                     
                     {error && (
                         <div className="alert alert-danger" role="alert">

@@ -11,39 +11,74 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../images/marcelo-leal-k7ll1hpdhFA-unsplash.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    min-height: 120vh;
+    background: url('../images/marcelo-leal-k7ll1hpdhFA-unsplash.jpg') center/cover no-repeat;
     background-attachment: fixed;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    z-index: 0;
 }
 
 .wrapper {
     position: relative;
     width: 400px;
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    padding: 40px;
+    padding: 2.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .wrapper h1 {
-    font-size: 2em;
+    font-size: 2.2rem;
     color: #8B4513;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.wrapper p {
+    color: #666;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1rem;
 }
 
 .input-box {
     position: relative;
     width: 100%;
     height: 50px;
-    margin: 30px 0;
+    margin: 1.5rem 0;
 }
 
 .input-box input {
@@ -56,7 +91,7 @@
     border-radius: 40px;
     font-size: 16px;
     color: #8B4513;
-    padding: 20px 45px 20px 20px;
+    padding: 0 20px;
     transition: all 0.3s ease;
 }
 
@@ -91,7 +126,7 @@
     color: #fff;
     font-weight: 600;
     transition: all 0.3s ease;
-    margin-top: 20px;
+    margin-top: 1rem;
 }
 
 .button:hover {
@@ -104,9 +139,16 @@
     transform: translateY(0);
 }
 
+.button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 .alert {
     padding: 10px 20px;
-    border-radius: 40px;
+    border-radius: 10px;
     margin-bottom: 20px;
     font-size: 14px;
     text-align: center;
@@ -121,8 +163,11 @@
 @media (max-width: 480px) {
     .wrapper {
         width: 100%;
-        height: 100vh;
-        border-radius: 0;
-        padding: 20px;
+        max-width: 400px;
+        padding: 2rem;
+    }
+    
+    .wrapper h1 {
+        font-size: 1.8rem;
     }
 }
