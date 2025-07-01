@@ -15,29 +15,37 @@ const NavBar = () => {
 
   useEffect(() => {
     const fetchAppointmentStatus = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
+      const token = sessionStorage.getItem('token');
+      const verified = sessionStorage.getItem('verified') === 'true';
+      const role = sessionStorage.getItem('role');
+  
+      if (!token || !verified || role !== 'patient') return;
+  
       try {
         const response = await fetch('http://localhost:5000/api/my-appointment', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-
+  
         const data = await response.json();
-        if (data.success && data.appointment) {
+        if (response.ok && data.appointment) {
           setHasAppointment(true);
+        } else {
+          setHasAppointment(false);
         }
       } catch (error) {
         console.error("Error checking appointment status", error);
+        setHasAppointment(false);
       }
     };
-
+  
     if (isAuthenticated) {
       fetchAppointmentStatus();
     }
   }, [isAuthenticated]);
+  
+  
 
   return (
     <header className="navbar-container">

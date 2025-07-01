@@ -52,7 +52,7 @@ useEffect(() => {
 
 
       <div className="dashboard-grid">
-        <div className="dashboard-card" onClick={() => navigate('/admin/dashboard')}>
+        <div className="dashboard-card" onClick={() => navigate('/admin/manageusers')}>
           <div className="card-icon">👥</div>
           <h3>Manage Users</h3>
           <p>Add, edit, or remove system users</p>

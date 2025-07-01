@@ -11,8 +11,18 @@ CREATE TABLE users (
   password VARCHAR(255),
   role ENUM('patient', 'staff', 'admin') DEFAULT 'patient',
   token VARCHAR(255),
+  is_verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE verification_codes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 
 
 CREATE TABLE queue (
@@ -43,24 +53,16 @@ CREATE TABLE appointments (
 );
 
 -- Create default admin
-INSERT INTO users (name, email, password, role)
+INSERT INTO users (name, email, password, role, is_verified)
 VALUES (
   'Default Admin',
   'admin@clinicqueue.com',
   -- password: Admin@123
   '$2b$10$LAnqSiPL4J9H/2hzG6yx0eaTSh7NywcnGP8J7wvgQdcCanAJMOiJu',
-  'admin'
+  'admin',
+  TRUE
 );
 
--- Create random staff
-INSERT INTO users (name, email, password, role)
-VALUES (
-  'John Doe',
-  'jdoe@clinicqueue.com',
-  -- password: Staff@123
-  '$2b$10$mmhvpqQ6vrlPo3EYyLA/gutxYhN8dXBi./NHofSRIfngecvYCdaiK',
-  'staff'
-);
 
 USE queue_manager;
 CREATE TABLE attendance (

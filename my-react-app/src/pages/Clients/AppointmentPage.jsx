@@ -19,7 +19,7 @@ function AppointmentPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) return alert("You must be logged in.");
 
     const response = await fetch('http://localhost:5000/api/appointments', {

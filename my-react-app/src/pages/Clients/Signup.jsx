@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/Authcontext';
+import { sendVerificationEmail } from '../EmailVerification';
 import usePasswordToggle from '../../hooks/usePasswordToggle';
 import './Signup.css';
 
@@ -44,15 +45,18 @@ function Signup() {
     try {
       const response = await fetch('http://localhost:5000/api/signup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',},
         body: JSON.stringify(user),
       });
 
       const data = await response.json();
       if (data.success) {
-        alert('Signup successful!');
-        login(data.token);
-        navigate('/');
+        // For demo: generate a fake token (replace this with backend verification logic later)
+        const token = Math.random().toString(36).substr(2);
+        // Trigger email
+        alert('Signup successful! Verification email sent.');
+        login(data.token);  // if you're not waiting for verification
+        navigate('/verify-code');
       } else {
         alert(data.message);
       }
@@ -61,6 +65,9 @@ function Signup() {
       alert('Something went wrong. Try again later.');
     }
   };
+  sessionStorage.setItem('pendingEmail', email);
+  sessionStorage.setItem('pendingName', name);
+
 
   return (
     <div className="body">

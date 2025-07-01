@@ -13,12 +13,14 @@ const ClockIn = () => {
       return;
     }
 
+    const token = sessionStorage.getItem('token');
+
     try {
       const res = await fetch('http://localhost:5000/api/clock-in', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ remarks, password })
       });

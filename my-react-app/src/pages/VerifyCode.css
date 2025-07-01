@@ -1,0 +1,68 @@
+.verify-code {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .verify-code h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+  }
+  
+  .verify-code input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  
+  .verify-code input:focus {
+    border-color: #007bff;
+  }
+  
+  .verify-code button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .verify-code button:hover {
+    background-color: #0056b3;
+  }
+  
+  .verify-code .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .verify-code button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
+  
+  .verify-code button + button {
+    margin-top: 0.75rem;
+    background-color: #6c757d;
+  }
+  
+  .verify-code button + button:hover {
+    background-color: #5a6268;
+  }
+  

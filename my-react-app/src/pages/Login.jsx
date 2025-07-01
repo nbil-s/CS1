@@ -10,27 +10,27 @@ function Login() {
     const [password, setPassword] = useState('');
 
     const handleLogin = async (e) => {
-    e.preventDefault();
-
-    const credentials = { email, password };
-    console.log('Sending credentials:', credentials);
-
-
-    try {
+      e.preventDefault();
+    
+      const credentials = { email, password };
+      console.log('Sending credentials:', credentials);
+    
+      try {
         const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(credentials),
         });
-
+    
         const data = await response.json();
-
+    
         if (data.success) {
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('userRole', data.user.role);
+          sessionStorage.setItem('token', data.token);
+          sessionStorage.setItem('role', data.user.role);
           login(data.token, data.user.role);
-          
-
+    
+          console.log("Saved token:", data.token); // ✅ Corrected line
+    
           if (data.user.role === 'admin') {
             navigate('/admin/dashboard');
           } else if (data.user.role === 'staff') {
@@ -39,13 +39,14 @@ function Login() {
             navigate('/'); // Patient homepage
           }
         } else {
-        alert(data.message);
+          alert(data.message);
         }
-    } catch (error) {
+      } catch (error) {
         console.error('Login error:', error);
         alert('Something went wrong. Try again later.');
-    }
+      }
     };
+    
 
   return (
     <div className="body">

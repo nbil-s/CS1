@@ -5,11 +5,17 @@ import './MyAppointment.css';
 function MyAppointment() {
   const [appointment, setAppointment] = useState(null);
 
+
+  const token = sessionStorage.getItem('token');
+  console.log('🔑 Token:', token);
+
+
   useEffect(() => {
     const fetchAppointment = async () => {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/my-appointment', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -20,10 +26,11 @@ function MyAppointment() {
   }, []);
 
   const handleCancel = async () => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     await fetch('http://localhost:5000/api/my-appointment', {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
+      headers: { 'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}` }
     });
     setAppointment(null);
     alert("Appointment cancelled.");

@@ -20,7 +20,7 @@ function QueueUp() {
     e.preventDefault();
 
     try {
-      const token = localStorage.getItem('token');
+      const token = sessionStorage.getItem('token');
       if (!token) {
         alert('You must be logged in to join the queue.');
         return;

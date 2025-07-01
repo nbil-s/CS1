@@ -7,9 +7,11 @@ const DeleteUser = () => {
 
   const fetchUsers = async () => {
     try {
+      const token = sessionStorage.getItem("token");
+
       const res = await fetch('http://localhost:5000/api/admin/users', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
+        headers: {"Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         }
       });
       const data = await res.json();

@@ -46,11 +46,15 @@ const AddUser = () => {
       email: fullEmail,
       phone: role === 'patient' ? null : phone
     };
+    
+    const token = sessionStorage.getItem('token');
 
     try {
       const res = await fetch('http://localhost:5000/api/admin/add-user', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+                    'Authorization': `bearer ${token}`
+         },
         body: JSON.stringify(newUser)
       });
 

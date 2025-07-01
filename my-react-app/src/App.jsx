@@ -4,12 +4,15 @@ import { Route, Routes } from 'react-router-dom';
 import Login from './pages/Login.jsx';
 import NavBar from './components/NavBar.jsx';
 import Signup from './pages/Clients/Signup.jsx';
+import VerifyCode from './pages/VerifyCode.jsx';
 import QueueUp from './pages/Clients/QueueUp.jsx';
 import Homepage from './pages/Clients/HomePage.jsx';
+import AddUser from './pages/dashboards/AddUser.jsx';
 import ClockIn from './pages/dashboards/ClockIn.jsx';
 import ClockOut from './pages/dashboards/ClockOut.jsx';
 import ViewQueue from './pages/Clients/ViewQueue.jsx';
 import Prescriptions from './pages/patient/Prescriptions';
+import DeleteUser from './pages/dashboards/DeleteUser.jsx';
 import MedicalRecords from './pages/patient/MedicalRecords';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ManageUsers from './pages/dashboards/ManageUsers.jsx';
@@ -31,14 +34,17 @@ function App() {
         <Route path="/signup" element={<Signup/>} />
         <Route path="/queue-up" element={<QueueUp />} />
         <Route path="/view-queue" element={<ViewQueue />} />
+        <Route path="/verify-code" element={<VerifyCode />} />
         <Route path="/prescriptions" element={<Prescriptions />} />
         <Route path="/my-appointment" element={<MyAppointment />} />
         <Route path="/admin-staff/clock-in" element={<ClockIn />} />
+        <Route path="/admin/manageusers/add" element={<AddUser />} />
         <Route path="/admin-staff/clock-out" element={<ClockOut />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
         <Route path="/appointment-page" element={<AppointmentPage />} />
         <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
         <Route path="/patient/dashboard" element={<PatientDashboard />} />
+        <Route path="/admin/manageusers/delete" element={<DeleteUser />} />
         <Route path="/receptionist/dashboard" element={<ReceptionistDashboard />} />
         <Route path="/admin/manageusers"element={<ProtectedRoute role="admin"><ManageUsers /></ProtectedRoute>} />
         <Route path="/admin/dashboard"element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
