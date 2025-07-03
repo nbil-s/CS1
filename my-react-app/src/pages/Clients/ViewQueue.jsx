@@ -11,6 +11,8 @@ function ViewQueue() {
         const data = await response.json();
         if (data.success) {
           setQueueData(data.queue);
+          console.log(data.queue);
+
         }
       } catch (error) {
         console.error("Queue fetch error:", error);

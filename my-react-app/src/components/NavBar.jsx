@@ -4,7 +4,7 @@ import { useAuth } from '../context/Authcontext';
 import './NavBar.css';
 
 const NavBar = () => {
-  const { isAuthenticated, hasAppointment, logout, userRole } = useAuth();
+  const { isAuthenticated, hasAppointment, logout, userRole, setHasAppointment } = useAuth();
 
   const navigate = useNavigate();
 
@@ -63,29 +63,23 @@ const NavBar = () => {
               <Link to="/my-details">My Details</Link>
             </>
           )}
-          {isAuthenticated && userRole === "admin" && (
-  <>
-    <Link to="/admin/dashboard">Home</Link>
-    <Link to="/admin/manageusers">Manage Users</Link>
-    <Link to="/admin-staff/clock-in">Clock In</Link>
-    <Link to="/admin-staff/clock-out">Clock Out</Link>
-    <Link to="/admin/reports">Reports</Link>
-    <Link to="/admin/audit-logs">Audit Logs</Link>
-  </>
-)}
-
-{isAuthenticated && userRole === "staff" && (
-  <>
-    <Link to="/staff/dashboard">Home</Link>
-    <Link to="/admin-staff/clock-in">Clock In</Link>
-    <Link to="/admin-staff/clock-out">Clock Out</Link>
-    <Link to="/staff/manage-appointments">Appointments</Link>
-    <Link to="/staff/queue-management">Queue Management</Link>
-    <Link to="/staff/patient-records">Patient Records</Link>
-    <Link to="/staff/consultations">Consultations</Link>
-  </>
-)}
-
+        {isAuthenticated && userRole === "admin" && (
+            <>
+              <Link to="/admin/dashboard">Home</Link>
+              <Link to="/admin/manageusers">Manage Users</Link>
+              <Link to="/admin-staff/clock-in">Clock In</Link>
+              <Link to="/admin-staff/clock-out">Clock Out</Link>
+              <Link to="/admin/reports">Reports</Link>
+              <Link to="/admin/audit-logs">Audit Logs</Link>
+            </>
+          )}
+        {isAuthenticated && userRole === "staff" && (
+            <>
+              <Link to="/staff/dashboard">Home</Link>
+              <Link to="/staff/patient-records">Patient Records</Link>
+              <Link to="/staff/consultations">Consultations</Link>
+            </>
+          )}
         </nav>
         <div className="navbar-auth">
           {!isAuthenticated ? (

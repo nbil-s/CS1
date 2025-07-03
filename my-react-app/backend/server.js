@@ -220,8 +220,8 @@ app.post('/api/queue', authenticateToken, (req, res) => {
 
 app.get('/api/view-queue', (req, res) => {
   const sql = `SELECT service, Ticket_num, joined_at
-               FROM queue
-               ORDER BY joined_at ASC`;
+              FROM queue
+              ORDER BY joined_at ASC`;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -237,6 +237,7 @@ app.post('/api/appointments', authenticateToken, (req, res) => {
   const { name, phone, department, clinician, date, time, reason } = req.body;
   const userId = req.user.id;
 
+  
   const sql = `
     INSERT INTO appointments (user_id, name, phone, department, clinician, date, time, reason)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -444,6 +445,74 @@ app.delete('/api/admin/delete-user/:id', authenticateToken, (req, res) => {
     });
   });
 });
+
+app.get('/api/admin/user/:id', authenticateToken, (req, res) => {
+  const userId = req.params.id;
+
+  const sql = 'SELECT user_id, name, email, phone, role FROM users WHERE user_id = ? AND role IN ("staff", "admin")';
+  db.query(sql, [userId], (err, results) => {
+    if (err || results.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, user: results[0] });
+  });
+});
+
+app.put('/api/admin/update-user/:id', authenticateToken, async (req, res) => {
+  const userId = req.params.id;
+  const { name, email, phone, role, password } = req.body;
+
+  if (!password) return res.status(400).json({ success: false, message: 'Password is required to update' });
+
+  // Verify password of the requesting admin
+  db.query('SELECT * FROM users WHERE user_id = ?', [req.user.id], async (err, results) => {
+    if (err || results.length === 0) return res.status(403).json({ success: false });
+
+    const match = await bcrypt.compare(password, results[0].password);
+    if (!match) return res.status(403).json({ success: false, message: 'Incorrect password' });
+
+    const sql = 'UPDATE users SET name = ?, email = ?, phone = ?, role = ? WHERE user_id = ?';
+    db.query(sql, [name, email, phone, role, userId], (err) => {
+      if (err) {
+        console.error('Update error:', err);
+        return res.status(500).json({ success: false, message: 'Update failed' });
+      }
+      res.json({ success: true, message: 'User updated successfully' });
+    });
+  });
+});
+
+// Get appointments assigned to a specific doctor
+app.get('/api/doctor/appointments', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  if (role !== 'doctor') {
+    return res.status(403).json({ success: false, message: 'Access denied: Not a doctor' });
+  }
+
+  const sql = `
+    SELECT * FROM appointments
+    WHERE clinician = (
+      SELECT name FROM users WHERE user_id = ?
+    )
+    ORDER BY date ASC, time ASC
+  `;
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching doctor appointments:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+
+    res.json({
+      success: true,
+      total: results.length,
+      appointments: results
+    });
+  });
+});
+
 
 
 app.listen(PORT, () => {

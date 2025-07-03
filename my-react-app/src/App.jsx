@@ -9,8 +9,9 @@ import QueueUp from './pages/Clients/QueueUp.jsx';
 import Homepage from './pages/Clients/HomePage.jsx';
 import AddUser from './pages/dashboards/AddUser.jsx';
 import ClockIn from './pages/dashboards/ClockIn.jsx';
-import ClockOut from './pages/dashboards/ClockOut.jsx';
 import ViewQueue from './pages/Clients/ViewQueue.jsx';
+import ClockOut from './pages/dashboards/ClockOut.jsx';
+import ViewUsers from './pages/dashboards/ViewUsers.jsx';
 import Prescriptions from './pages/patient/Prescriptions';
 import DeleteUser from './pages/dashboards/DeleteUser.jsx';
 import MedicalRecords from './pages/patient/MedicalRecords';
@@ -41,6 +42,7 @@ function App() {
         <Route path="/admin/manageusers/add" element={<AddUser />} />
         <Route path="/admin-staff/clock-out" element={<ClockOut />} />
         <Route path="/medical-records" element={<MedicalRecords />} />
+        <Route path="/admin/manageusers/view" element={<ViewUsers />}/>
         <Route path="/appointment-page" element={<AppointmentPage />} />
         <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
         <Route path="/patient/dashboard" element={<PatientDashboard />} />

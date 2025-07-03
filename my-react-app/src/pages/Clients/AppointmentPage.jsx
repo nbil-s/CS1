@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/Authcontext';
 import './AppointmentPage.css';
 
 function AppointmentPage() {
@@ -16,12 +17,29 @@ function AppointmentPage() {
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
+  
+  const today = new Date().toISOString().split("T")[0];
+  const isToday = formData.date === today;
+  const minTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  console.log("Submitting formData:", formData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = sessionStorage.getItem('token');
     if (!token) return alert("You must be logged in.");
-
+  
+    const now = new Date();
+    const selectedDateTime = new Date(`${formData.date}T${formData.time}`);
+  
+    // Validate future date and time
+    if (selectedDateTime < now) {
+      return alert("You cannot book an appointment in the past.");
+    }
+    if (!formData.date || !formData.time) {
+      return alert("Please select both date and time.");
+    }
+  
     const response = await fetch('http://localhost:5000/api/appointments', {
       method: 'POST',
       headers: {
@@ -30,7 +48,7 @@ function AppointmentPage() {
       },
       body: JSON.stringify(formData)
     });
-
+  
     const data = await response.json();
     if (data.success) {
       setHasAppointment(true);
@@ -40,6 +58,7 @@ function AppointmentPage() {
       alert(data.message || "Error booking appointment.");
     }
   };
+  
 
   return (
     <div className="container appointment-page py-5 mt-5">
@@ -82,11 +101,12 @@ function AppointmentPage() {
           <div className="row mb-3">
             <div className="col-md-6">
               <label className="form-label">Date</label>
-              <input type="date" name="date" className="form-control" required onChange={handleChange} />
+              <input type="date" name="date" className="form-control" required min={new Date().toISOString().split('T')[0]} onChange={handleChange} />
             </div>
             <div className="col-md-6">
               <label className="form-label">Time</label>
-              <input type="time" name="time" className="form-control" required onChange={handleChange} />
+              <input type="time" name="time" className="form-control" required onChange={handleChange} min={isToday ? minTime : undefined}/>
+
             </div>
           </div>
 

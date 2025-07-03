@@ -1,0 +1,73 @@
+.view-users-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #111827;
+    color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #38bdf8;
+  }
+  
+  .status {
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #1f2937;
+    border: 1px solid #38bdf8;
+    border-radius: 8px;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1f2937;
+  }
+  
+  .user-table th, .user-table td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #374151;
+  }
+  
+  .user-table input,
+  .user-table select {
+    padding: 6px;
+    font-size: 14px;
+    width: 95%;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background-color: #111;
+    color: #fff;
+  }
+  
+  button {
+    padding: 6px 10px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .edit-btn {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .save-btn {
+    background-color: #16a34a;
+    color: white;
+  }
+  
+  .cancel-btn {
+    background-color: #dc2626;
+    color: white;
+  }
+  
