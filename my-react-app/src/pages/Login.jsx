@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import api from '../services/api';
 import './Login.css';
 
@@ -12,6 +13,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,10 +29,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/login', formData);
+      // Send the correct field names that the backend expects
+      const loginData = {
+        email: formData.username, // Map username field to email
+        password: formData.password,
+        role: formData.role
+      };
+      
+      console.log('Sending login data:', { ...loginData, password: '***' });
+      
+      const response = await api.post('/auth/login', loginData);
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('role', formData.role);
+        // Use the login function from AuthContext
+        login(response.data.token, response.data.user);
         
         // Navigate to role-specific dashboard
         switch (formData.role) {
@@ -75,7 +86,7 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="username" className="form-label">
-              <i className="bx bx-user me-2"></i>Username
+              <i className="bx bx-user me-2"></i>Email or Username
             </label>
             <input
               type="text"
@@ -85,7 +96,7 @@ const Login = () => {
               value={formData.username}
               onChange={handleChange}
               required
-              placeholder="Enter your username"
+              placeholder="Enter your email or username"
             />
           </div>
           
@@ -114,12 +125,13 @@ const Login = () => {
               id="role"
               name="role"
               value={formData.role}
-              onChange={handleChange}
+              onChange={(e) => setFormData({...formData, role: e.target.value})}
+              required
             >
+              <option value="">Select Role</option>
               <option value="patient">Patient</option>
               <option value="doctor">Doctor</option>
               <option value="receptionist">Receptionist</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
           

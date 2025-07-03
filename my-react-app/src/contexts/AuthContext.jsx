@@ -31,43 +31,25 @@ export function AuthProvider({ children }) {
       const response = await api.get('/auth/me');
       setUser(response.data);
     } catch (error) {
+      console.error('Error fetching user:', error);
       localStorage.removeItem('token');
       delete api.defaults.headers.common['Authorization'];
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (username, password, role) => {
-    try {
-      const response = await api.post('/auth/login', { username, password, role });
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
-      return { success: true };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Login failed' 
-      };
-    }
-  };
-
-  const signup = async (userData) => {
-    try {
-      const response = await api.post('/auth/signup', userData);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { 
-        success: false, 
-        error: error.response?.data?.message || 'Signup failed' 
-      };
-    }
+  const login = (token, userData) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', userData.role);
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
     delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
@@ -76,7 +58,6 @@ export function AuthProvider({ children }) {
     user,
     loading,
     login,
-    signup,
     logout
   };
 

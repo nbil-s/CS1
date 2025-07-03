@@ -4,10 +4,10 @@ import './Queue.css';
 
 export default function Queue() {
   const [queueData, setQueueData] = useState({
-    position: 0,
-    estimatedWaitTime: 0,
+    queue: [],
     currentPatient: null,
-    queueLength: 0
+    position: null,
+    totalWaiting: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,9 +16,11 @@ export default function Queue() {
     const fetchQueueData = async () => {
       try {
         const response = await api.get('/patient/queue');
+        console.log('Queue response:', response.data);
         setQueueData(response.data);
         setLoading(false);
       } catch (err) {
+        console.error('Queue error:', err);
         setError('Failed to fetch queue data. Please try again later.');
         setLoading(false);
       }
@@ -54,35 +56,75 @@ export default function Queue() {
         <p className="last-updated">Last updated: {new Date().toLocaleTimeString()}</p>
       </div>
 
+      {/* Prominent Queue Number Display */}
+      {queueData.currentPatient && (
+        <div className="queue-number-display">
+          <div className="queue-number-card">
+            <div className="queue-number-icon">🎫</div>
+            <div className="queue-number-content">
+              <h2>Your Queue Number</h2>
+              <div className="queue-number-value">#{queueData.currentPatient.queueNumber}</div>
+              <p className="queue-number-status">Status: {queueData.currentPatient.status}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="queue-status">
         <div className="status-card">
           <div className="status-icon">🎯</div>
           <h2>Your Position</h2>
-          <p className="status-value">{queueData.position}</p>
+          <p className="status-value">{queueData.position || 'Not in queue'}</p>
           <p className="status-label">in queue</p>
         </div>
 
         <div className="status-card">
           <div className="status-icon">⏱️</div>
           <h2>Estimated Wait</h2>
-          <p className="status-value">{queueData.estimatedWaitTime}</p>
+          <p className="status-value">
+            {queueData.currentPatient?.estimatedWaitTime || 0}
+          </p>
           <p className="status-label">minutes</p>
         </div>
 
         <div className="status-card">
           <div className="status-icon">👥</div>
           <h2>Queue Length</h2>
-          <p className="status-value">{queueData.queueLength}</p>
+          <p className="status-value">{queueData.totalWaiting}</p>
           <p className="status-label">patients waiting</p>
         </div>
       </div>
 
       {queueData.currentPatient && (
         <div className="current-patient">
-          <h2>Currently Being Served</h2>
+          <h2>Your Queue Information</h2>
           <div className="patient-info">
-            <p>Patient: {queueData.currentPatient.name}</p>
-            <p>Doctor: {queueData.currentPatient.doctor}</p>
+            <p><strong>Queue Number:</strong> {queueData.currentPatient.queueNumber}</p>
+            <p><strong>Status:</strong> {queueData.currentPatient.status}</p>
+            {queueData.currentPatient.doctor && (
+              <p><strong>Assigned Doctor:</strong> {queueData.currentPatient.doctor.name}</p>
+            )}
+            {queueData.currentPatient.priority !== 'normal' && (
+              <p><strong>Priority:</strong> {queueData.currentPatient.priority}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {queueData.queue.length > 0 && (
+        <div className="queue-list">
+          <h2>Current Queue</h2>
+          <div className="queue-items">
+            {queueData.queue.slice(0, 5).map((item, index) => (
+              <div key={item.id} className={`queue-item ${item.patientId === queueData.currentPatient?.patientId ? 'current' : ''}`}>
+                <span className="queue-number">#{item.queueNumber}</span>
+                <span className="patient-name">{item.patient.name}</span>
+                <span className="status">{item.status}</span>
+                {item.priority !== 'normal' && (
+                  <span className="priority">{item.priority}</span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -101,9 +143,11 @@ export default function Queue() {
         <button className="refresh-button" onClick={() => window.location.reload()}>
           Refresh Queue Status
         </button>
-        <button className="notify-button">
-          Notify When It's My Turn
-        </button>
+        {!queueData.currentPatient && (
+          <button className="join-queue-button">
+            Join Queue
+          </button>
+        )}
       </div>
     </div>
   );

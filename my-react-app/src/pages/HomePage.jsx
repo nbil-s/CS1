@@ -6,21 +6,36 @@ const Homepage = () => {
   return (
     <div className="home-page">
       {/* Hero Section */}
-      <div className="hero-section">
+      <div className="hero-section hero-bg-image">
         <div className="container">
-          <div className="row align-items-center">
-            <div className="col-md-6">
-              <h1 className="display-4 fw-bold">Welcome to Our Hospital</h1>
-              <p className="lead">Providing quality healthcare services with compassion and excellence.</p>
-              <div className="d-grid gap-2 d-md-flex justify-content-md-start">
-                <Link to="/login" className="btn btn-light btn-lg px-4 me-md-2">Login</Link>
-                <Link to="/signup" className="btn btn-outline-light btn-lg px-4">Sign Up</Link>
+          <div className="row align-items-center min-vh-100">
+            <div className="col-lg-12">
+              <div className="hero-content text-center">
+                <h1 className="hero-title">
+                  Welcome to <span className="highlight">SmartCare</span>
+                </h1>
+                <p className="hero-subtitle">
+                  Modern, digital-first hospital management for patients, doctors, and staff. Book appointments, manage queues, and access your health records—all in one place.
+                </p>
+                <div className="hero-buttons">
+                  <Link to="/login" className="btn btn-primary btn-lg">
+                    <i className="bx bx-log-in me-2"></i>
+                    Login
+                  </Link>
+                  <Link to="/signup" className="btn btn-outline-light btn-lg">
+                    <i className="bx bx-user-plus me-2"></i>
+                    Get Started
+                  </Link>
+                </div>
+                {/* Colorful Medical Icons Row */}
+                <div className="hero-icons-row mt-5">
+                  <span className="icon medical-icon medical-blue"><i className="bx bx-heart"></i></span>
+                  <span className="icon medical-icon medical-green"><i className="bx bx-calendar"></i></span>
+                  <span className="icon medical-icon medical-purple"><i className="bx bx-user"></i></span>
+                  <span className="icon medical-icon medical-orange"><i className="bx bx-shield"></i></span>
+                  <span className="icon medical-icon medical-pink"><i className="bx bx-clipboard"></i></span>
+                </div>
               </div>
-            </div>
-            <div className="col-md-6">
-              <img src="https://img.freepik.com/free-vector/hospital-building_1308-26662.jpg" 
-                   alt="Hospital" 
-                   className="img-fluid rounded shadow-lg" />
             </div>
           </div>
         </div>
@@ -29,70 +44,63 @@ const Homepage = () => {
       {/* Features Section */}
       <div className="features-section">
         <div className="container">
-          <h2 className="text-center mb-5" style={{ color: '#3E2723' }}>Our Services</h2>
-          <div className="row g-4">
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
-                  <i className="bx bx-calendar-check display-4 mb-3"></i>
-                  <h3 className="card-title" style={{ color: '#3E2723' }}>Easy Appointments</h3>
-                  <p className="card-text" style={{ color: '#666' }}>Book your appointments online with our user-friendly system.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
-                  <i className="bx bx-user-voice display-4 mb-3"></i>
-                  <h3 className="card-title" style={{ color: '#3E2723' }}>Virtual Consultations</h3>
-                  <p className="card-text" style={{ color: '#666' }}>Connect with our doctors remotely for medical advice.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
-                  <i className="bx bx-clipboard display-4 mb-3"></i>
-                  <h3 className="card-title" style={{ color: '#3E2723' }}>Digital Records</h3>
-                  <p className="card-text" style={{ color: '#666' }}>Access your medical history and test results online.</p>
-                </div>
-              </div>
-            </div>
+          <div className="section-header text-center">
+            <h2 className="section-title">All-in-One Healthcare Platform</h2>
+            <p className="section-subtitle">Everything you need for modern hospital management</p>
           </div>
-        </div>
-      </div>
-
-      {/* Why Choose Us Section */}
-      <div className="why-us-section">
-        <div className="container">
-          <h2 className="text-center mb-5" style={{ color: '#3E2723' }}>Why Choose Us</h2>
           <div className="row g-4">
-            <div className="col-md-3">
-              <div className="text-center">
-                <i className="bx bx-check-circle display-4 mb-3"></i>
-                <h4>Quality Care</h4>
-                <p>Experienced medical professionals</p>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-blue">
+                  <i className="bx bx-calendar"></i>
+                </div>
+                <h3>Book Appointments</h3>
+                <p>Schedule visits with your doctor in seconds. Real-time availability and instant confirmation.</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="text-center">
-                <i className="bx bx-time display-4 mb-3"></i>
-                <h4>24/7 Service</h4>
-                <p>Round-the-clock medical assistance</p>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-green">
+                  <i className="bx bx-user"></i>
+                </div>
+                <h3>Virtual Consultations</h3>
+                <p>Connect with healthcare professionals from the comfort of your home.</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="text-center">
-                <i className="bx bx-heart display-4 mb-3"></i>
-                <h4>Patient First</h4>
-                <p>Personalized care approach</p>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-purple">
+                  <i className="bx bx-clipboard"></i>
+                </div>
+                <h3>Digital Records</h3>
+                <p>Access your medical history, prescriptions, and test results securely online.</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="text-center">
-                <i className="bx bx-shield display-4 mb-3"></i>
-                <h4>Modern Facility</h4>
-                <p>State-of-the-art equipment</p>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-orange">
+                  <i className="bx bx-shield"></i>
+                </div>
+                <h3>Queue Management</h3>
+                <p>Know your position and estimated wait time. Get notified when it's your turn.</p>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-pink">
+                  <i className="bx bx-heart"></i>
+                </div>
+                <h3>Health Monitoring</h3>
+                <p>Track your health metrics and receive personalized insights.</p>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="feature-card">
+                <div className="feature-icon medical-yellow">
+                  <i className="bx bx-message"></i>
+                </div>
+                <h3>Instant Notifications</h3>
+                <p>Stay updated with real-time alerts about appointments and results.</p>
               </div>
             </div>
           </div>
@@ -103,10 +111,21 @@ const Homepage = () => {
       <div className="cta-section">
         <div className="container">
           <div className="row justify-content-center">
-            <div className="col-md-8 text-center">
-              <h2 className="mb-4">Ready to Get Started?</h2>
-              <p className="lead mb-4">Join our healthcare community today and experience the best medical care.</p>
-              <Link to="/signup" className="btn btn-primary btn-lg px-5">Get Started Now</Link>
+            <div className="col-lg-8 text-center">
+              <h2 className="cta-title">Ready to Experience Modern Healthcare?</h2>
+              <p className="cta-subtitle">
+                Join SmartCare today and take control of your health journey.
+              </p>
+              <div className="cta-buttons">
+                <Link to="/signup" className="btn btn-primary btn-lg">
+                  <i className="bx bx-rocket me-2"></i>
+                  Get Started
+                </Link>
+                <Link to="/login" className="btn btn-outline-primary btn-lg">
+                  <i className="bx bx-log-in me-2"></i>
+                  Sign In
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -116,3 +135,4 @@ const Homepage = () => {
 };
 
 export default Homepage;
+

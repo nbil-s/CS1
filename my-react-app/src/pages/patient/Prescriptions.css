@@ -1,0 +1,102 @@
+.prescriptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.prescription-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.prescription-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.prescription-header h3 {
+  color: #2c3e50;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.status.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.completed {
+  background-color: #e2e3e5;
+  color: #6c757d;
+}
+
+.prescription-details {
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  margin: 0.5rem 0;
+  align-items: flex-start;
+}
+
+.label {
+  font-weight: bold;
+  color: #2c3e50;
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+.value {
+  color: #666;
+  flex-grow: 1;
+}
+
+.value.refills {
+  color: #007bff;
+  font-weight: bold;
+}
+
+.prescription-actions {
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.refill-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.refill-button:hover {
+  background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+  .detail-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .label {
+    min-width: auto;
+  }
+} 

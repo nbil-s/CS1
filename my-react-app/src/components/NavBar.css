@@ -19,7 +19,7 @@
 }
 
 .navbar-brand {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: #333;
   text-decoration: none;
@@ -34,11 +34,11 @@
   color: #666;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease;
+  transition: color 0.2s;
 }
 
 .nav-link:hover {
-  color: #007bff;
+  color: #007bff !important;
 }
 
 .navbar-buttons {
@@ -76,6 +76,63 @@
   border-color: #0056b3;
 }
 
+.dropdown-menu {
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.dropdown-item-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.position-relative {
+  position: relative !important;
+}
+
+.position-absolute {
+  position: absolute !important;
+}
+
+.top-0 {
+  top: 0 !important;
+}
+
+.start-100 {
+  left: 100% !important;
+}
+
+.translate-middle {
+  transform: translate(-50%, -50%) !important;
+}
+
+.rounded-pill {
+  border-radius: 50rem !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.me-auto {
+  margin-right: auto !important;
+}
+
 @media (max-width: 768px) {
   .navbar-menu {
     display: none;
@@ -83,5 +140,19 @@
   
   .navbar-container {
     justify-content: space-between;
+  }
+  
+  .navbar-nav {
+    margin-top: 1rem;
+  }
+  
+  .dropdown-menu {
+    position: static !important;
+    float: none;
+    width: auto;
+    margin-top: 0;
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
   }
 } 

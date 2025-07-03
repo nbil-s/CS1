@@ -46,7 +46,13 @@ export default function BookAppointment() {
       const isCurrentMonth = date.getMonth() === month;
       const isToday = date.toDateString() === today.toDateString();
       const isPast = date < today;
-      const isSelected = selectedDate === date.toISOString().split('T')[0];
+      
+      // Fix date comparison for selection
+      const dateYear = date.getFullYear();
+      const dateMonth = String(date.getMonth() + 1).padStart(2, '0');
+      const dateDay = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${dateYear}-${dateMonth}-${dateDay}`;
+      const isSelected = selectedDate === formattedDate;
       
       days.push({
         date,
@@ -62,29 +68,42 @@ export default function BookAppointment() {
 
   const handleDateSelect = (date) => {
     if (date < new Date()) return; // Can't select past dates
-    setSelectedDate(date.toISOString().split('T')[0]);
+    
+    // Fix timezone issue by creating date in local timezone
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    
+    setSelectedDate(formattedDate);
     setSelectedTime(''); // Reset time when date changes
   };
 
   const handleBook = async () => {
-    if (!selectedDate || !selectedTime || !selectedDoctor) {
-      alert('Please select a date, time, and doctor');
+    if (!selectedDate || !selectedTime) {
+      alert('Please select a date and time');
       return;
     }
 
     setLoading(true);
     try {
-      const datetime = `${selectedDate}T${selectedTime}`;
-      await api.post('/patient/appointments', { 
-        datetime,
-        doctor: selectedDoctor,
-        type: appointmentType,
-        notes 
-      });
-      alert('Appointment booked successfully!');
-      navigate('/patient/dashboard');
+      // Format the data to match our backend API
+      const appointmentData = {
+        appointmentDate: selectedDate,
+        appointmentTime: selectedTime,
+        reason: `${appointmentType} - ${notes || 'No additional notes'}`
+      };
+
+      const response = await api.post('/patient/appointments', appointmentData);
+      
+      if (response.data.message) {
+        alert('Appointment booked successfully!');
+        navigate('/patient/dashboard');
+      }
     } catch (err) {
-      alert('Failed to book appointment. Please try again.');
+      console.error('Booking error:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to book appointment. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -226,7 +245,7 @@ export default function BookAppointment() {
             <button 
               className="book-button"
               onClick={handleBook}
-              disabled={loading || !selectedDate || !selectedTime || !selectedDoctor}
+              disabled={loading || !selectedDate || !selectedTime}
             >
               {loading ? 'Booking...' : 'Book Appointment'}
             </button>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001/api',
+  baseURL: 'http://localhost:5000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
@@ -13,6 +13,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
+    console.log('API Request:', config.method?.toUpperCase(), config.url, 'Token:', token ? 'Present' : 'Missing');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,8 +27,13 @@ api.interceptors.request.use(
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('API Response:', response.status, response.config.url);
+    return response;
+  },
   async (error) => {
+    console.error('API Error:', error.response?.status, error.config?.url, error.message);
+    
     if (error.code === 'ECONNABORTED') {
       console.error('Request timeout');
       return Promise.reject(new Error('Request timeout. Please try again.'));
@@ -40,6 +46,7 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized
     if (error.response.status === 401) {
+      console.log('Unauthorized - clearing auth data');
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       window.location.href = '/login';
