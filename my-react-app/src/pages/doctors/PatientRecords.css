@@ -1,0 +1,23 @@
+.records-container {
+  padding: 2rem;
+  background-color: #f4f6f8;
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.records-table th, .records-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.records-table th {
+  background-color: #f1f1f1;
+}

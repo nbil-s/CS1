@@ -1,0 +1,22 @@
+.appointments-container {
+  padding: 2rem;
+  background-color: #f8f9fa;
+}
+
+h2 {
+  margin-bottom: 1rem;
+}
+
+.appointments-list {
+  list-style: none;
+  padding: 0;
+}
+
+.appointment-card {
+  background: #fff;
+  border-left: 5px solid #4CAF50;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 6px;
+}

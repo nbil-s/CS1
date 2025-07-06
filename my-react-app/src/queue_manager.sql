@@ -15,6 +15,7 @@ CREATE TABLE users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
 CREATE TABLE verification_codes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -23,11 +24,16 @@ CREATE TABLE verification_codes (
   FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE staff_roles (
+  user_id INT PRIMARY KEY,
+  staff_type ENUM('doctor', 'receptionist') NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
 
 
 CREATE TABLE queue (
   queue_id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
+  user_id INT NULL,
   name VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   service VARCHAR(50) NOT NULL,
@@ -36,6 +42,8 @@ CREATE TABLE queue (
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+
+
 -- STEP 1: Create the appointments table in `queue_manager`
 USE queue_manager;
 CREATE TABLE appointments (
@@ -75,7 +83,6 @@ CREATE TABLE attendance (
   UNIQUE KEY unique_attendance (user_id, date),
   FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
-
 
 
 

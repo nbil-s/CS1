@@ -27,17 +27,24 @@ function Login() {
         if (data.success) {
           sessionStorage.setItem('token', data.token);
           sessionStorage.setItem('role', data.user.role);
-          login(data.token, data.user.role);
+          login(data.token, data.user.role, true, data.user.staffType);
     
           console.log("Saved token:", data.token); // ✅ Corrected line
     
           if (data.user.role === 'admin') {
             navigate('/admin/dashboard');
           } else if (data.user.role === 'staff') {
-            navigate('/staff/dashboard');
+            const staffType = data.user.staffType;
+            if (staffType === 'doctor') {
+              navigate('/doctor/dashboard');
+            } else if (staffType === 'receptionist') {
+              navigate('/receptionist/dashboard');
+            } else {
+              navigate('/staff/dashboard'); // fallback
+            }
           } else {
-            navigate('/'); // Patient homepage
-          }
+            navigate('/patient/dashboard');
+          }          
         } else {
           alert(data.message);
         }

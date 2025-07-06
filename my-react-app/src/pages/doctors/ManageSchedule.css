@@ -1,0 +1,46 @@
+.schedule-container {
+  padding: 2rem;
+  max-width: 600px;
+  margin: auto;
+  background: #fdfdfd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  border-radius: 8px;
+}
+
+.schedule-container h2 {
+  margin-bottom: 1.5rem;
+}
+
+.schedule-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.schedule-row label {
+  font-weight: bold;
+  flex: 1;
+}
+
+.schedule-row input {
+  flex: 2;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.schedule-container button {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.schedule-container button:hover {
+  background-color: #218838;
+}

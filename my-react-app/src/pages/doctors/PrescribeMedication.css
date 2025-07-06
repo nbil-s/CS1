@@ -1,0 +1,40 @@
+.prescription-form {
+  padding: 2rem;
+  max-width: 600px;
+  margin: auto;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+.prescription-form h2 {
+  margin-bottom: 1.5rem;
+}
+
+.prescription-form form {
+  display: flex;
+  flex-direction: column;
+}
+
+.prescription-form input,
+.prescription-form textarea {
+  margin-bottom: 1rem;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.prescription-form button {
+  padding: 0.8rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.prescription-form button:hover {
+  background-color: #0056b3;
+}

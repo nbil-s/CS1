@@ -4,7 +4,7 @@ import { useAuth } from '../context/Authcontext';
 import './NavBar.css';
 
 const NavBar = () => {
-  const { isAuthenticated, hasAppointment, logout, userRole, setHasAppointment } = useAuth();
+  const { isAuthenticated, hasAppointment, logout, userRole, staffType, setHasAppointment } = useAuth();
 
   const navigate = useNavigate();
 
@@ -44,7 +44,23 @@ const NavBar = () => {
       fetchAppointmentStatus();
     }
   }, [isAuthenticated]);
-  
+
+  const { setStaffType } = useAuth(); // add this to your AuthContext
+
+useEffect(() => {
+  const fetchStaffType = async () => {
+    if (userRole === 'staff') {
+      const token = sessionStorage.getItem('token');
+      const res = await fetch('http://localhost:5000/api/staff-type', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.staffType) setStaffType(data.staffType);
+    }
+  };
+
+  if (isAuthenticated) fetchStaffType();
+}, [isAuthenticated]);
   
 
   return (
@@ -54,7 +70,7 @@ const NavBar = () => {
         <nav className="navbar-links">
         {isAuthenticated && userRole === "patient" && (
             <>
-              <Link to="/">Home</Link>
+              <Link to="/patient/dashboard">Home</Link>
               <Link to="/view-queue">View Queue</Link>
               <Link to={hasAppointment ? "/my-appointment" : "/appointment-page"}>
                   {hasAppointment ? "My Appointment" : "Appointment"}
@@ -73,13 +89,26 @@ const NavBar = () => {
               <Link to="/admin/audit-logs">Audit Logs</Link>
             </>
           )}
-        {isAuthenticated && userRole === "staff" && (
-            <>
-              <Link to="/staff/dashboard">Home</Link>
-              <Link to="/staff/patient-records">Patient Records</Link>
-              <Link to="/staff/consultations">Consultations</Link>
-            </>
-          )}
+        {isAuthenticated && userRole === "staff" && staffType === "doctor" && (
+        <>
+          <Link to="/doctor/dashboard">Home</Link>
+          <Link to="/appointments">Appointments</Link>
+          <Link to="/patients">Patient Records</Link>
+          <Link to="/prescribe">Prescribe Medication</Link>
+          <Link to="/schedule">Manage Schedule</Link>
+        </>
+        )}
+        {isAuthenticated && userRole === "staff" && staffType === "receptionist" && (
+        <>
+          <Link to="/receptionist/dashboard">Home</Link>
+          <Link to="/register-patient">Register Patient</Link>
+          <Link to="/manage-appointments">Approve Appointments</Link>
+          <Link to="/handle-queue">Handle Queue</Link>
+          <Link to="/billing">Billing</Link>
+          <Link to="/patient-records">Patient Records</Link>
+        </>
+        )}
+
         </nav>
         <div className="navbar-auth">
           {!isAuthenticated ? (

@@ -111,6 +111,30 @@ app.post('/api/signup', async (req, res) => {
   });
 });
 
+app.post('/api/resend-code', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+
+  db.query('SELECT user_id, name FROM users WHERE email = ?', [email], (err, results) => {
+    if (err || results.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const user = results[0];
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    db.query('DELETE FROM verification_codes WHERE user_id = ?', [user.user_id], () => {
+      db.query('INSERT INTO verification_codes (user_id, code) VALUES (?, ?)', [user.user_id, newCode], (err) => {
+        if (err) return res.status(500).json({ success: false, message: 'Failed to generate code' });
+
+        sendVerificationEmail({ name: user.name, email, code: newCode });
+        res.json({ success: true, message: 'Verification code resent' });
+      });
+    });
+  });
+});
+
+
 app.post('/api/verify-code', (req, res) => {
   const { code } = req.body;
 
@@ -135,7 +159,7 @@ app.post('/api/verify-code', (req, res) => {
       const token = jwt.sign(
         { id: user.user_id, email: user.email, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '2h' }
+        { expiresIn: '8h' }
       );
 
       db.query('DELETE FROM verification_codes WHERE user_id = ?', [user.user_id]);
@@ -178,20 +202,39 @@ app.post('/api/login', (req, res) => {
       { expiresIn: '2h' }
     );
 
-    res.json({
-      success: true,
-      message: 'Login successful',
-      token,
-      user: {
-        id: user.user_id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+    if (user.role === 'staff') {
+      const staffSql = 'SELECT staff_type FROM staff_roles WHERE user_id = ?';
+      db.query(staffSql, [user.user_id], (err, staffResults) => {
+        const staffType = (staffResults && staffResults[0]) ? staffResults[0].staff_type : null;
+    
+        res.json({
+          success: true,
+          message: 'Login successful',
+          token,
+          user: {
+            id: user.user_id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            staffType: staffType // ➕ Include staff type
+          }
+        });
+      });
+    } else {
+      res.json({
+        success: true,
+        message: 'Login successful',
+        token,
+        user: {
+          id: user.user_id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+    };
   });
 });
-
 
 
 // Join Queue Route
@@ -217,11 +260,37 @@ app.post('/api/queue', authenticateToken, (req, res) => {
   });
 });
 
+app.post('/api/remote-queue', authenticateToken, (req, res) => {
+  const { name, phone, service, reason } = req.body;
+  const staffRole = req.user.role;
+
+  if (staffRole !== 'staff') {
+    return res.status(403).json({ success: false, message: 'Only staff can add patients remotely' });
+  }
+
+  if (!name || !phone || !service)
+    return res.status(400).json({ success: false, message: 'Name, phone, and service are required' });
+
+  const ticketNumber = `${service.substring(0, 3).toUpperCase()}-${Date.now().toString().slice(-5)}`;
+
+  const sql = `INSERT INTO queue (user_id, name, phone, service, reason, joined_at, Ticket_num)
+               VALUES (NULL, ?, ?, ?, ?, NOW(), ?)`;
+
+  db.query(sql, [name, phone, service, reason, ticketNumber], (err) => {
+    if (err) {
+      console.error('Remote Queue Error:', err);
+      return res.status(500).json({ success: false, message: 'Failed to add patient to queue' });
+    }
+    res.json({ success: true, message: 'Patient added to queue', ticket: ticketNumber });
+  });
+});
+
+
 
 app.get('/api/view-queue', (req, res) => {
-  const sql = `SELECT service, Ticket_num, joined_at
-              FROM queue
-              ORDER BY joined_at ASC`;
+  const sql = `SELECT queue_id, name, phone, service, Ticket_num, joined_at
+               FROM queue
+               ORDER BY joined_at ASC`;
 
   db.query(sql, (err, results) => {
     if (err) {
@@ -232,6 +301,7 @@ app.get('/api/view-queue', (req, res) => {
     res.json({ success: true, queue: results });
   });
 });
+
 
 app.post('/api/appointments', authenticateToken, (req, res) => {
   const { name, phone, department, clinician, date, time, reason } = req.body;
@@ -320,24 +390,44 @@ app.post('/api/admin/add-user', authenticateToken, async (req, res) => {
   VALUES (?, ?, ?, ?, ?, ?)
 `;
 
-db.query(insertSql, [name, email, phone, role, hashedPassword, true], (err) => {
+db.query(insertSql, [name, email, phone, role, hashedPassword, true], (err, result) => {
   if (err) {
     console.error('Insert Error:', err);
     return res.status(500).json({ success: false, message: 'User creation failed' });
   }
 
-  // Simulate sending email
-  console.log(`📧 Email sent to ${email} with temp password: ${randomPassword}`);
+  const userId = result.insertId;
 
-  res.status(201).json({
-    success: true,
-    message: 'User added successfully',
-    password: randomPassword
-  });
-});
+  // Insert into staff_roles if staff
+  if (role === 'staff') {
+    const staffType = req.body.staffType;
+    const insertStaffSql = 'INSERT INTO staff_roles (user_id, staff_type) VALUES (?, ?)';
+    db.query(insertStaffSql, [userId, staffType], (staffErr) => {
+      if (staffErr) {
+        console.error('Staff role insert error:', staffErr);
+        return res.status(500).json({ success: false, message: 'Failed to assign staff role' });
+      }
 
-  });
-});
+      // Success
+      console.log(`📧 Email sent to ${email} with temp password: ${randomPassword}`);
+      return res.status(201).json({
+        success: true,
+        message: 'Staff added successfully',
+        password: randomPassword
+      });
+    });
+  } else {
+    // Admin success response
+    console.log(`📧 Email sent to ${email} with temp password: ${randomPassword}`);
+    res.status(201).json({
+      success: true,
+      message: 'Admin added successfully',
+      password: randomPassword
+    });
+  }
+  })
+})
+})
 
 // Admin: Get all staff/admin users
 app.get('/api/admin/users', authenticateToken, (req, res) => {
@@ -432,6 +522,10 @@ app.delete('/api/admin/delete-user/:id', authenticateToken, (req, res) => {
     if (targetUser.role === 'admin') {
       return res.status(403).json({ success: false, message: 'You are not allowed to delete other admins' });
     }
+    if (parseInt(userId) === requestingAdminId) {
+      return res.status(403).json({ success: false, message: 'You cannot delete yourself' });
+    }
+    
 
     // Step 3: Proceed with deletion for staff
     const deleteSql = 'DELETE FROM users WHERE user_id = ?';
@@ -487,7 +581,9 @@ app.get('/api/doctor/appointments', authenticateToken, (req, res) => {
   const userId = req.user.id;
   const role = req.user.role;
 
-  if (role !== 'doctor') {
+  const checkStaffSql = 'SELECT staff_type FROM staff_roles WHERE user_id = ?';
+ db.query(checkStaffSql, [userId], (err, results) => {
+  if (err || results.length === 0 || results[0].staff_type !== 'doctor') {
     return res.status(403).json({ success: false, message: 'Access denied: Not a doctor' });
   }
 
@@ -510,9 +606,124 @@ app.get('/api/doctor/appointments', authenticateToken, (req, res) => {
       total: results.length,
       appointments: results
     });
+  })
   });
 });
 
+
+app.get('/api/staff-type', authenticateToken, async (req, res) => {
+  try {
+    const [result] = await db.promise().query(
+      'SELECT staff_type FROM staff_roles WHERE user_id = ?',
+      [req.user.id] // ✅ FIXED
+    );
+
+    if (result.length > 0) {
+      res.json({ success: true, staffType: result[0].staff_type });
+    } else {
+      res.json({ success: false, message: 'Staff role not found' });
+    }
+  } catch (err) {
+    console.error("❌ Staff type fetch error:", err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
+// Get the next patient in the queue (oldest joined_at)
+app.get('/api/next-patient', authenticateToken, (req, res) => {
+  const role = req.user.role;
+
+  if (role !== 'staff') {
+    return res.status(403).json({ success: false, message: 'Only staff can view queue' });
+  }
+
+  const sql = `SELECT * FROM queue ORDER BY joined_at ASC LIMIT 1`;
+
+  db.query(sql, (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: 'Failed to fetch next patient' });
+    if (results.length === 0) return res.json({ success: true, patient: null });
+    res.json({ success: true, patient: results[0] });
+  });
+});
+
+// Confirm/call patient and remove from queue
+app.delete('/api/confirm-patient/:queueId', authenticateToken, (req, res) => {
+  const role = req.user.role;
+
+  if (role !== 'staff') {
+    return res.status(403).json({ success: false, message: 'Only staff can remove from queue' });
+  }
+
+  const queueId = req.params.queueId;
+
+  const sql = 'DELETE FROM queue WHERE queue_id = ?';
+  db.query(sql, [queueId], (err) => {
+    if (err) return res.status(500).json({ success: false, message: 'Failed to confirm patient' });
+    res.json({ success: true, message: 'Patient confirmed and removed from queue' });
+  });
+});
+
+// DELETE: Remove patient from queue by ticket number or name
+app.delete('/api/remove-from-queue', authenticateToken, (req, res) => {
+  const { ticket, name } = req.body;
+  const role = req.user.role;
+
+  if (role !== 'staff') {
+    return res.status(403).json({ success: false, message: 'Only staff can remove from queue' });
+  }
+
+  let sql, param;
+  if (ticket) {
+    sql = 'DELETE FROM queue WHERE Ticket_num = ?';
+    param = ticket;
+  } else if (name) {
+    sql = 'DELETE FROM queue WHERE name = ?';
+    param = name;
+  } else {
+    return res.status(400).json({ success: false, message: 'Provide ticket number or name' });
+  }
+
+  db.query(sql, [param], (err, result) => {
+    if (err) {
+      console.error('❌ Remove Error:', err);
+      return res.status(500).json({ success: false, message: 'Failed to remove from queue' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.json({ success: false, message: 'No matching patient found' });
+    }
+
+    res.json({ success: true, message: 'Patient removed from queue' });
+  });
+});
+
+app.patch('/api/increase-priority/:ticket', authenticateToken, (req, res) => {
+  const { ticket } = req.params;
+  const userRole = req.user.role;
+
+  if (userRole !== 'staff') {
+    return res.status(403).json({ success: false, message: 'Only staff can update priority.' });
+  }
+
+  const checkSql = 'SELECT * FROM queue WHERE Ticket_num = ?';
+  db.query(checkSql, [ticket], (err, results) => {
+    if (err || results.length === 0) {
+      return res.status(404).json({ success: false, message: 'Patient not found.' });
+    }
+
+    const queueId = results[0].queue_id;
+    const prioritySql = 'UPDATE queue SET joined_at = NOW() - INTERVAL 1 HOUR WHERE queue_id = ?';
+    db.query(prioritySql, [queueId], (err2) => {
+      if (err2) {
+        console.error('Priority update error:', err2);
+        return res.status(500).json({ success: false, message: 'Failed to increase priority.' });
+      }
+
+      res.json({ success: true, message: 'Priority increased.' });
+    });
+  });
+});
 
 
 app.listen(PORT, () => {

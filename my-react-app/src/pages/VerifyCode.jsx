@@ -9,6 +9,7 @@ function VerifyCode() {
   const [email, setEmail] = useState(''); // Needed for resend
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(false);
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -46,11 +47,13 @@ function VerifyCode() {
   };
 
   const handleResend = async () => {
+    setResendCooldown(true);
+    setTimeout(() => setResendCooldown(false), 30000); // 30s
     try {
       const res = await fetch('http://localhost:5000/api/resend-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ email }),
       });
 
       const data = await res.json();
@@ -79,8 +82,8 @@ function VerifyCode() {
       </button>
       {error && <p className="error">{error}</p>}
 
-      <button onClick={handleResend} style={{ marginTop: '10px' }}>
-        Resend Code
+      <button onClick={handleResend} disabled={resendCooldown}>
+        {resendCooldown ? 'Please wait...' : 'Resend Code'}
       </button>
     </div>
   );

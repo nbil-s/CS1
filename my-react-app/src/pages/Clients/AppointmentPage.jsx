@@ -1,127 +1,128 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/Authcontext';
-import './AppointmentPage.css';
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import "./AppointmentPage.css";
 
-function AppointmentPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    department: '',
-    clinician: '',
-    date: '',
-    time: '',
-    reason: ''
-  });
-  const { setHasAppointment } = useAuth();
+export default function AppointmentPage() {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [department, setDepartment] = useState('');
+  const [clinician, setClinician] = useState('');
+  const [reason, setReason] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+  const [selectedTime, setSelectedTime] = useState('');
+  const [message, setMessage] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const departments = ['General', 'Pediatrics', 'Dermatology', 'Dental'];
+
+  useEffect(() => {
+    if (selectedDate) {
+      const day = selectedDate.getDay();
+      let slots;
+
+      if (day === 0) {
+        // Sunday: 9:00 AM – 1:00 PM
+        slots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30'];
+      } else {
+        // Other days: normal slots
+        slots = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'];
+      }
+
+      setAvailableTimeSlots(slots);
+      setSelectedTime('');
+    }
+  }, [selectedDate]);
+
+  const handleDateChange = (date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (date <= today) {
+      alert('You can only book appointments from tomorrow onwards.');
+      return;
+    }
+    setSelectedDate(date);
   };
-  
-  const today = new Date().toISOString().split("T")[0];
-  const isToday = formData.date === today;
-  const minTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-  console.log("Submitting formData:", formData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = sessionStorage.getItem('token');
-    if (!token) return alert("You must be logged in.");
-  
-    const now = new Date();
-    const selectedDateTime = new Date(`${formData.date}T${formData.time}`);
-  
-    // Validate future date and time
-    if (selectedDateTime < now) {
-      return alert("You cannot book an appointment in the past.");
+
+    if (!name || !phone || !department || !clinician || !selectedDate || !selectedTime) {
+      setMessage('Please fill in all required fields.');
+      return;
     }
-    if (!formData.date || !formData.time) {
-      return alert("Please select both date and time.");
-    }
-  
-    const response = await fetch('http://localhost:5000/api/appointments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(formData)
-    });
-  
-    const data = await response.json();
-    if (data.success) {
-      setHasAppointment(true);
-      alert("Appointment booked!");
-      navigate("/my-appointment");
-    } else {
-      alert(data.message || "Error booking appointment.");
+
+    const formattedDate = selectedDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+    try {
+      const response = await api.post('/api/appointments', {
+        name,
+        phone,
+        department,
+        clinician,
+        date: formattedDate,
+        time: selectedTime,
+        reason
+      });
+
+      if (response.data.success) {
+        setMessage('Appointment booked successfully!');
+        // Optionally clear form
+        setName('');
+        setPhone('');
+        setDepartment('');
+        setClinician('');
+        setReason('');
+        setSelectedDate(null);
+        setSelectedTime('');
+      } else {
+        setMessage('Failed to book appointment.');
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage('Server error. Please try again.');
     }
   };
-  
 
   return (
-    <div className="container appointment-page py-5 mt-5">
-      <h2 className="text-center mb-4">Book an Appointment</h2>
-      <div className="card p-4 shadow-sm">
-        <form onSubmit={handleSubmit}>
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label">Full Name</label>
-              <input type="text" name="name" className="form-control" required onChange={handleChange} />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Phone Number</label>
-              <input type="tel" name="phone" className="form-control" required onChange={handleChange} />
-            </div>
-          </div>
+    <div className="appointment-page">
+      <h2>Book Appointment</h2>
+      {message && <p className="message">{message}</p>}
+      <form onSubmit={handleSubmit}>
+        <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+        <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} required />
 
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label">Department</label>
-              <select name="department" className="form-select" required onChange={handleChange}>
-                <option value="">Choose...</option>
-                <option>General Consultation</option>
-                <option>Dental</option>
-                <option>Pediatrics</option>
-                <option>Dermatology</option>
-              </select>
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Clinician</label>
-              <select name="clinician" className="form-select" required onChange={handleChange}>
-                <option value="">Select Clinician</option>
-                <option>Dr. Mwangi</option>
-                <option>Dr. Wanjiku</option>
-                <option>Dr. Otieno</option>
-              </select>
-            </div>
-          </div>
+        <select value={department} onChange={e => setDepartment(e.target.value)} required>
+          <option value="">Select Department</option>
+          {departments.map((dept, index) => (
+            <option key={index} value={dept}>{dept}</option>
+          ))}
+        </select>
 
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label className="form-label">Date</label>
-              <input type="date" name="date" className="form-control" required min={new Date().toISOString().split('T')[0]} onChange={handleChange} />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Time</label>
-              <input type="time" name="time" className="form-control" required onChange={handleChange} min={isToday ? minTime : undefined}/>
+        <input type="text" placeholder="Preferred Clinician" value={clinician} onChange={e => setClinician(e.target.value)} required />
+        
+        <textarea placeholder="Reason (optional)" value={reason} onChange={e => setReason(e.target.value)} />
 
-            </div>
-          </div>
+        <div className="calendar-container">
+          <label>Select Date:</label>
+          <Calendar onChange={handleDateChange} value={selectedDate} minDate={new Date(new Date().setDate(new Date().getDate() + 1))} />
+        </div>
 
-          <div className="mb-3">
-            <label className="form-label">Reason for Appointment</label>
-            <textarea name="reason" className="form-control" rows="3" onChange={handleChange}></textarea>
+        {selectedDate && (
+          <div className="time-slot-container">
+            <label>Select Time:</label>
+            <select value={selectedTime} onChange={e => setSelectedTime(e.target.value)} required>
+              <option value="">Select Time Slot</option>
+              {availableTimeSlots.map((slot, index) => (
+                <option key={index} value={slot}>{slot}</option>
+              ))}
+            </select>
           </div>
+        )}
 
-          <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" className="btn btn-primary">Book Appointment</button>
-          </div>
-        </form>
-      </div>
+        <button type="submit">Book Appointment</button>
+      </form>
     </div>
   );
 }
-
-export default AppointmentPage;

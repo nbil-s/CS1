@@ -1,13 +1,125 @@
+/* Page container */
 .appointment-page {
-    background-color: #f9fbfc;
-    min-height: 100vh;
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header */
+.appointment-page h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Message */
+.message {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: green;
+  font-weight: bold;
+}
+
+/* Form styling */
+.appointment-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Inputs and textarea */
+.appointment-page input,
+.appointment-page select,
+.appointment-page textarea {
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.appointment-page textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Calendar container */
+.calendar-container {
+  margin-top: 1rem;
+}
+
+.calendar-container label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Time slot container */
+.time-slot-container {
+  margin-top: 1rem;
+}
+
+.time-slot-container label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+/* Button */
+.appointment-page button[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  padding: 12px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.appointment-page button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+/* Calendar styles from react-calendar */
+.react-calendar {
+  width: 100%;
+  background: #f9fbfc;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+.react-calendar__tile {
+  padding: 0.75rem 0;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #333; /* Make date text visible on white background */
+}
+
+.react-calendar__tile--active {
+  background-color: #007bff;
+  color: white;
+}
+
+.react-calendar__tile--now {
+  background: #e0f0ff;
+}
+
+.react-calendar__tile:disabled {
+  background-color: #f0f0f0;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .appointment-page {
+    padding: 1rem;
   }
-  
-  .card {
-    border-radius: 12px;
-  }
-  
-  .form-label {
-    font-weight: 500;
-  }
-  
+}
