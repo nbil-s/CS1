@@ -40,6 +40,7 @@ exports.createAppointment = async (req, res) => {
       // Create notification for appointment creation
       await createNotification(
         req.user.id,
+        'patient',
         'appointment',
         'Appointment Booked',
         `Your appointment has been booked for ${new Date(appointmentDate).toLocaleDateString()} at ${appointmentTime}. Status: Pending`,
@@ -141,6 +142,7 @@ exports.updateAppointmentStatus = async (req, res) => {
 
       await createNotification(
         appointment.patientId,
+        'patient',
         'appointment',
         notificationTitle,
         notificationMessage,

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './NavBar.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignOutAlt, faUser, faHome, faCalendarAlt, faListAlt, faFileMedical, faPills, faUserMd, faUserNurse, faUserShield, faClipboardList, faEye, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faSignOutAlt, faUser, faHome, faCalendarAlt, faListAlt, faFileMedical, faPills, faUserMd, faUserNurse, faUserShield, faClipboardList, faEye, faPlus, faInfoCircle, faCogs } from '@fortawesome/free-solid-svg-icons';
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -14,24 +14,9 @@ const NavBar = () => {
     navigate('/');
   };
 
+  // Only show navbar for logged-in users
   if (!user) {
-    return (
-      <nav className="navbar">
-        <div className="nav-container">
-          <Link to="/" className="nav-logo">
-            <FontAwesomeIcon icon={faHome} /> Clinic Queue
-          </Link>
-          <div className="nav-menu">
-            <Link to="/login" className="nav-link">
-              <FontAwesomeIcon icon={faUser} /> Login
-            </Link>
-            <Link to="/signup" className="nav-link">
-              <FontAwesomeIcon icon={faUser} /> Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
-    );
+    return null;
   }
 
   const renderPatientLinks = () => (
@@ -78,9 +63,6 @@ const NavBar = () => {
       </Link>
       <Link to="/queue-up" className="nav-link">
         <FontAwesomeIcon icon={faPlus} /> Queue Management
-      </Link>
-      <Link to="/numberanddetails" className="nav-link">
-        <FontAwesomeIcon icon={faClipboardList} /> Number & Details
       </Link>
     </>
   );

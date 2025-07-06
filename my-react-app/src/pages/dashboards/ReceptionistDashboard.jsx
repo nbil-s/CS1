@@ -7,29 +7,35 @@ import '../Dashboard.css';
 export default function ReceptionistDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState([]);
-  const [queue, setQueue] = useState([]);
-  const [patients, setPatients] = useState([]);
+  const [queueData, setQueueData] = useState({
+    queue: [],
+    stats: {
+      total: 0,
+      waiting: 0,
+      called: 0,
+      inConsultation: 0,
+      completed: 0
+    }
+  });
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchReceptionistData();
+    // Refresh queue data every 30 seconds
+    const interval = setInterval(fetchReceptionistData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchReceptionistData = async () => {
     try {
-      const [appointmentsRes, queueRes, patientsRes, notificationsRes] = await Promise.all([
-        api.get('/receptionist/appointments'),
-        api.get('/queue'),
-        api.get('/receptionist/patients'),
+      const [queueRes, notificationsRes] = await Promise.all([
+        api.get('/queue/detailed'),
         api.get('/notifications/receptionist')
       ]);
 
-      setAppointments(appointmentsRes.data.appointments || []);
-      setQueue(queueRes.data.queue || []);
-      setPatients(patientsRes.data.patients || []);
+      setQueueData(queueRes.data);
       setNotifications(notificationsRes.data.notifications || []);
     } catch (err) {
       console.error('Error fetching receptionist data:', err);
@@ -39,21 +45,21 @@ export default function ReceptionistDashboard() {
     }
   };
 
-  const assignDoctor = async (appointmentId, doctorId) => {
-    try {
-      await api.put(`/receptionist/appointments/${appointmentId}/assign-doctor`, { doctorId });
-      fetchReceptionistData(); // Refresh data
-    } catch (err) {
-      console.error('Error assigning doctor:', err);
-    }
-  };
-
   const updateQueueStatus = async (queueId, status) => {
     try {
       await api.put(`/queue/${queueId}/status`, { status });
       fetchReceptionistData(); // Refresh data
     } catch (err) {
       console.error('Error updating queue status:', err);
+    }
+  };
+
+  const removeFromQueue = async (queueId) => {
+    try {
+      await api.delete(`/queue/${queueId}`);
+      fetchReceptionistData(); // Refresh data
+    } catch (err) {
+      console.error('Error removing from queue:', err);
     }
   };
 
@@ -70,8 +76,7 @@ export default function ReceptionistDashboard() {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'appointment': return '📅';
-      case 'queue': return '⏳';
+      case 'queue': return '🎫';
       case 'patient': return '👤';
       case 'reminder': return '🔔';
       case 'system': return 'ℹ️';
@@ -79,16 +84,15 @@ export default function ReceptionistDashboard() {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (loading) return <div className="loading">Loading receptionist dashboard...</div>;
   if (error) return <div className="error">{error}</div>;
 
-  const pendingAppointments = appointments.filter(apt => apt.status === 'pending');
-  const activeQueue = queue.filter(q => q.status === 'waiting' || q.status === 'called');
+  const activeQueue = queueData.queue.filter(q => q.status === 'waiting' || q.status === 'called');
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
@@ -104,106 +108,82 @@ export default function ReceptionistDashboard() {
 
       <div className="dashboard-grid">
         <div className="dashboard-card">
-          <div className="card-icon">📅</div>
-          <h3>Appointments</h3>
-          <p>{pendingAppointments.length} pending appointments</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/receptionist/appointments')}>Manage Appointments</button>
-          </div>
+          <div className="card-icon">🎫</div>
+          <h3>Queue Management</h3>
+          <p>{queueData.stats.total} total patients</p>
         </div>
 
         <div className="dashboard-card">
-          <div className="card-icon">⏳</div>
-          <h3>Queue</h3>
-          <p>{activeQueue.length} patients in queue</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/receptionist/queue')}>Manage Queue</button>
-          </div>
+          <div className="card-icon">⏰</div>
+          <h3>Waiting Patients</h3>
+          <p>{queueData.stats.waiting} patients waiting</p>
         </div>
 
         <div className="dashboard-card">
-          <div className="card-icon">👤</div>
-          <h3>Patients</h3>
-          <p>{patients.length} registered patients</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/receptionist/patients')}>View Patients</button>
-          </div>
+          <div className="card-icon">📞</div>
+          <h3>Called Patients</h3>
+          <p>{queueData.stats.called} patients called</p>
         </div>
 
         <div className="dashboard-card">
-          <div className="card-icon">💰</div>
-          <h3>Billing</h3>
-          <p>Manage payments and invoices</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/receptionist/billing')}>View Billing</button>
-          </div>
+          <div className="card-icon">👨‍⚕️</div>
+          <h3>In Consultation</h3>
+          <p>{queueData.stats.inConsultation} patients</p>
         </div>
       </div>
 
       <div className="dashboard-sections">
         <div className="section">
-          <h2>Pending Appointments</h2>
-          {pendingAppointments.length === 0 ? (
-            <p className="no-data">No pending appointments.</p>
-          ) : (
-            <div className="appointments-list">
-              {pendingAppointments.map(appointment => (
-                <div key={appointment.id} className="appointment-item">
-                  <div className="appointment-info">
-                    <h4>{appointment.patient?.name || 'Unknown Patient'}</h4>
-                    <p>Date: {formatDate(appointment.appointmentDate)}</p>
-                    <p>Reason: {appointment.reason || 'Not specified'}</p>
-                    <p>Doctor: {appointment.doctor?.name || 'Unassigned'}</p>
-                  </div>
-                  <div className="appointment-actions">
-                    {!appointment.doctor && (
-                      <button 
-                        className="btn-assign"
-                        onClick={() => navigate(`/receptionist/appointments/${appointment.id}/assign`)}
-                      >
-                        Assign Doctor
-                      </button>
-                    )}
-                    <button 
-                      className="btn-view"
-                      onClick={() => navigate(`/receptionist/appointments/${appointment.id}`)}
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="section">
-          <h2>Active Queue</h2>
-          {activeQueue.length === 0 ? (
-            <p className="no-data">No patients in queue.</p>
+          <h2>Current Queue</h2>
+          {queueData.queue.length === 0 ? (
+            <p className="no-data">No patients in queue currently.</p>
           ) : (
             <div className="queue-list">
-              {activeQueue.map(queueItem => (
-                <div key={queueItem.id} className="queue-item">
+              {queueData.queue.map(queueEntry => (
+                <div key={queueEntry.id} className={`queue-item ${queueEntry.status}`}>
                   <div className="queue-info">
-                    <h4>#{queueItem.queueNumber} - {queueItem.patient?.name || 'Unknown Patient'}</h4>
-                    <p>Status: <span className={`status-${queueItem.status}`}>{queueItem.status}</span></p>
-                    <p>Doctor: {queueItem.doctor?.name || 'Unassigned'}</p>
-                    <p>Joined: {formatDate(queueItem.createdAt)}</p>
+                    <div className="queue-number">#{queueEntry.queueNumber}</div>
+                    <div className="patient-details">
+                      <h4>{queueEntry.patient?.name || 'Unknown Patient'}</h4>
+                      <p>Position: {queueEntry.position}</p>
+                      <p>Priority: <span className={`priority-${queueEntry.priority}`}>{queueEntry.priority}</span></p>
+                      <p>Estimated Wait: {queueEntry.estimatedWaitTime} minutes</p>
+                      {queueEntry.notes && <p>Notes: {queueEntry.notes}</p>}
+                      <p>Joined: {formatTime(queueEntry.createdAt)}</p>
+                    </div>
+                    <div className="queue-status">
+                      <span className={`status-${queueEntry.status}`}>{queueEntry.status}</span>
+                    </div>
                   </div>
                   <div className="queue-actions">
-                    {queueItem.status === 'waiting' && (
+                    {queueEntry.status === 'waiting' && (
+                      <>
+                        <button 
+                          className="btn-call"
+                          onClick={() => updateQueueStatus(queueEntry.id, 'called')}
+                        >
+                          Call Patient
+                        </button>
+                        <button 
+                          className="btn-remove"
+                          onClick={() => removeFromQueue(queueEntry.id)}
+                        >
+                          Remove
+                        </button>
+                      </>
+                    )}
+                    {queueEntry.status === 'called' && (
                       <button 
-                        className="btn-call"
-                        onClick={() => updateQueueStatus(queueItem.id, 'called')}
+                        className="btn-start"
+                        onClick={() => updateQueueStatus(queueEntry.id, 'in-consultation')}
                       >
-                        Call Patient
+                        Start Consultation
                       </button>
                     )}
-                    {queueItem.status === 'called' && (
+                    {queueEntry.status === 'in-consultation' && (
                       <button 
                         className="btn-complete"
-                        onClick={() => updateQueueStatus(queueItem.id, 'completed')}
+                        onClick={() => updateQueueStatus(queueEntry.id, 'completed')}
                       >
                         Complete
                       </button>
@@ -233,7 +213,7 @@ export default function ReceptionistDashboard() {
                   <div className="notification-content">
                     <h4>{notification.title}</h4>
                     <p>{notification.message}</p>
-                    <span className="notification-date">{formatDate(notification.createdAt)}</span>
+                    <span className="notification-date">{formatTime(notification.createdAt)}</span>
                   </div>
                   {!notification.read && <div className="notification-badge" />}
                 </div>

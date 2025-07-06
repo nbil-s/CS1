@@ -279,3 +279,22 @@ exports.getSchedule = async (req, res) => {
     res.status(500).json({ message: 'Failed to get schedule', error: error.message });
   }
 }; 
+
+// Get all doctors (for patients to select from)
+exports.getAllDoctors = async (req, res) => {
+  try {
+    const doctors = await User.findAll({
+      where: { 
+        role: 'doctor',
+        isActive: true
+      },
+      attributes: ['id', 'name', 'specialization', 'email'],
+      order: [['name', 'ASC']]
+    });
+    
+    res.json({ doctors });
+  } catch (error) {
+    console.error('Get all doctors error:', error);
+    res.status(500).json({ message: 'Failed to get doctors', error: error.message });
+  }
+}; 

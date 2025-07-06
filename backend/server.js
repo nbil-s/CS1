@@ -22,24 +22,27 @@ app.use(cors({
 
 app.use(express.json());
 
+// Debug middleware to log all requests (placed BEFORE routes)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Test route to verify server is working
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Server is working!' });
 });
 
+console.log('Mounting routes...');
 app.use('/api/auth', authRoutes);
 app.use('/api/doctor', doctorRoutes);
 app.use('/api/receptionist', receptionistRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/queue', queueRoutes);
+console.log('Mounting notifications routes at /api/notifications');
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
-
-// Debug middleware to log all requests
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
+console.log('All routes mounted');
 
 initModels();
 

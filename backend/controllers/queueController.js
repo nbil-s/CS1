@@ -27,7 +27,8 @@ exports.getCurrentQueue = async (req, res) => {
         where: { status: ['waiting', 'called'] },
         include: [
           { model: User, as: 'patient', attributes: ['id', 'name'] },
-          { model: User, as: 'doctor', attributes: ['id', 'name'] }
+          { model: User, as: 'doctor', attributes: ['id', 'name'] },
+          { model: User, as: 'receptionist', attributes: ['id', 'name'] }
         ],
         order: [['queueNumber', 'ASC']]
       });
@@ -61,6 +62,9 @@ exports.addToQueue = async (req, res) => {
         return res.status(400).json({ message: 'Invalid patientId: user does not exist' });
       }
 
+      // Handle empty doctorId - set to null if empty string or undefined
+      const validDoctorId = doctorId && doctorId !== '' ? doctorId : null;
+
       // Get next queue number
       const lastQueue = await Queue.findOne({
         order: [['queueNumber', 'DESC']]
@@ -75,7 +79,8 @@ exports.addToQueue = async (req, res) => {
 
       const queueEntry = await Queue.create({
         patientId,
-        doctorId,
+        doctorId: validDoctorId,
+        receptionistId: req.user.id, // Record the receptionist who added the patient
         queueNumber: nextNumber,
         priority,
         estimatedWaitTime: estimatedWait,
@@ -85,6 +90,7 @@ exports.addToQueue = async (req, res) => {
       // Create notification for patient
       await createNotification(
         patientId,
+        'patient',
         'queue',
         'Added to Queue',
         `You have been added to the queue with number ${nextNumber}. Estimated wait time: ${estimatedWait} minutes.`,
@@ -110,6 +116,9 @@ exports.createQueue = async (req, res) => {
       const { doctorId, priority, notes } = req.body;
       const patientId = req.user.id;
 
+      // Handle empty doctorId - set to null if empty string or undefined
+      const validDoctorId = doctorId && doctorId !== '' ? doctorId : null;
+
       // Get next queue number
       const lastQueue = await Queue.findOne({
         order: [['queueNumber', 'DESC']]
@@ -122,7 +131,7 @@ exports.createQueue = async (req, res) => {
 
       const queueEntry = await Queue.create({
         patientId,
-        doctorId,
+        doctorId: validDoctorId,
         queueNumber: nextNumber,
         priority,
         estimatedWaitTime: estimatedWait,
@@ -132,6 +141,7 @@ exports.createQueue = async (req, res) => {
       // Create notification for patient
       await createNotification(
         patientId,
+        'patient',
         'queue',
         'Added to Queue',
         `You have been added to the queue with number ${nextNumber}. Estimated wait time: ${estimatedWait} minutes.`,
@@ -193,6 +203,7 @@ exports.updateQueueStatus = async (req, res) => {
 
       await createNotification(
         queueEntry.patientId,
+        'patient',
         'queue',
         notificationTitle,
         notificationMessage,
@@ -245,6 +256,7 @@ exports.removeFromQueue = async (req, res) => {
       // Create notification before removing
       await createNotification(
         queueEntry.patientId,
+        'patient',
         'queue',
         'Removed from Queue',
         `You have been removed from the queue (number ${queueEntry.queueNumber}).`,
@@ -258,5 +270,127 @@ exports.removeFromQueue = async (req, res) => {
   } catch (error) {
     console.error('Remove from queue error:', error);
     res.status(500).json({ message: 'Failed to remove from queue', error: error.message });
+  }
+}; 
+
+// Get doctor's queue (for doctors to see their patients)
+exports.getDoctorQueue = async (req, res) => {
+  try {
+    verifyToken(req, res, async () => {
+      const doctorId = req.user.id;
+      
+      const queue = await Queue.findAll({
+        where: { 
+          doctorId: doctorId,
+          status: ['waiting', 'called', 'in-consultation']
+        },
+        include: [
+          { model: User, as: 'patient', attributes: ['id', 'name', 'email'] }
+        ],
+        order: [['queueNumber', 'ASC']]
+      });
+
+      // Calculate queue position for each patient
+      const queueWithPosition = queue.map((item, index) => ({
+        ...item.toJSON(),
+        position: index + 1
+      }));
+
+      res.json({ 
+        queue: queueWithPosition,
+        totalWaiting: queue.filter(item => item.status === 'waiting').length,
+        totalCalled: queue.filter(item => item.status === 'called').length,
+        totalInConsultation: queue.filter(item => item.status === 'in-consultation').length
+      });
+    });
+  } catch (error) {
+    console.error('Get doctor queue error:', error);
+    res.status(500).json({ message: 'Failed to get doctor queue', error: error.message });
+  }
+};
+
+// Get patient's queue status (for patients to check their position)
+exports.getPatientQueueStatus = async (req, res) => {
+  try {
+    verifyToken(req, res, async () => {
+      const patientId = req.user.id;
+      
+      const patientQueue = await Queue.findOne({
+        where: { 
+          patientId: patientId,
+          status: ['waiting', 'called', 'in-consultation']
+        },
+        include: [
+          { model: User, as: 'doctor', attributes: ['id', 'name'] }
+        ]
+      });
+
+      if (!patientQueue) {
+        return res.json({ 
+          inQueue: false,
+          message: 'You are not currently in the queue'
+        });
+      }
+
+      // Get total queue to calculate position
+      const totalQueue = await Queue.findAll({
+        where: { status: ['waiting', 'called', 'in-consultation'] },
+        order: [['queueNumber', 'ASC']]
+      });
+
+      const position = totalQueue.findIndex(item => item.id === patientQueue.id) + 1;
+
+      res.json({
+        inQueue: true,
+        queueEntry: patientQueue,
+        position: position,
+        totalWaiting: totalQueue.filter(item => item.status === 'waiting').length,
+        estimatedWaitTime: patientQueue.estimatedWaitTime
+      });
+    });
+  } catch (error) {
+    console.error('Get patient queue status error:', error);
+    res.status(500).json({ message: 'Failed to get queue status', error: error.message });
+  }
+};
+
+// Get detailed queue information for receptionist
+exports.getDetailedQueue = async (req, res) => {
+  try {
+    verifyToken(req, res, async () => {
+      const queue = await Queue.findAll({
+        include: [
+          { model: User, as: 'patient', attributes: ['id', 'name', 'email', 'phone'] },
+          { model: User, as: 'doctor', attributes: ['id', 'name'] }
+        ],
+        order: [['queueNumber', 'ASC']]
+      });
+
+      // Calculate position and wait time for each entry
+      const queueWithDetails = queue.map((item, index) => {
+        const waitingAhead = queue.slice(0, index).filter(q => q.status === 'waiting').length;
+        return {
+          ...item.toJSON(),
+          position: index + 1,
+          estimatedWaitTime: waitingAhead * 15 // 15 minutes per person ahead
+        };
+      });
+
+      const stats = {
+        total: queue.length,
+        waiting: queue.filter(item => item.status === 'waiting').length,
+        called: queue.filter(item => item.status === 'called').length,
+        inConsultation: queue.filter(item => item.status === 'in-consultation').length,
+        completed: queue.filter(item => item.status === 'completed').length
+      };
+
+      res.json({ 
+        queue: queueWithDetails,
+        stats
+      });
+    });
+  } catch (error) {
+    console.error('Get detailed queue error:', error);
+    res.status(500).json({ message: 'Failed to get detailed queue', error: error.message });
   }
 }; 

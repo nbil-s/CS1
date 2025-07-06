@@ -23,6 +23,14 @@ const Queue = sequelize.define('Queue', {
       key: 'id'
     }
   },
+  receptionistId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'Users',
+      key: 'id'
+    }
+  },
   queueNumber: {
     type: DataTypes.INTEGER,
     allowNull: false

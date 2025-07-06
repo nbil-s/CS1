@@ -2,11 +2,12 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  margin-top: 120px; /* Add top margin to account for fixed navbar */
+  padding-top: 140px; /* Increased from 100px to add space below fixed navbar */
 }
 
 .dashboard-header {
   margin-bottom: 2rem;
+  padding-top: 0;
 }
 
 .dashboard-header h1 {
@@ -169,6 +170,7 @@
 @media (max-width: 768px) {
   .doctor-dashboard {
     padding: 1rem;
+    padding-top: 140px; /* Keep spacing consistent on smaller screens */
   }
 
   .appointment-card {
@@ -180,4 +182,4 @@
     width: 100%;
     justify-content: center;
   }
-} 
+}

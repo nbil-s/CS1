@@ -1,240 +1,240 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import './ReceptionistDashboard.css';
 
 export default function ReceptionistDashboard() {
+  const { user } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [queue, setQueue] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [activeTab, setActiveTab] = useState('appointments'); // 'appointments' or 'queue'
+  const [activeTab, setActiveTab] = useState('appointments');
+  const [selectedPatient, setSelectedPatient] = useState('');
+  const [testResult, setTestResult] = useState('');
 
   useEffect(() => {
     fetchAppointments();
     fetchDoctors();
     fetchQueue();
+    setLoading(false);
   }, [selectedDate]);
+
+  const testApiConnection = async () => {
+    try {
+      console.log('Testing API connection...');
+      const response = await api.get('/test');
+      console.log('Test response:', response.data);
+      setTestResult('API connection successful: ' + JSON.stringify(response.data));
+      setError(null);
+    } catch (err) {
+      console.error('API test failed:', err);
+      setTestResult('API test failed: ' + (err.response?.data?.message || err.message));
+      setError('API connection test failed: ' + (err.response?.data?.message || err.message));
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
       const response = await api.get(`/receptionist/appointments?date=${selectedDate}`);
-      console.log('API Response:', response.data);
-      console.log('Appointments data:', response.data.appointments);
+      console.log('Appointments response:', response.data);
       setAppointments(response.data.appointments || []);
-      setLoading(false);
+      setError(null);
     } catch (err) {
-      console.error('Fetch appointments error:', err);
-      setError('Failed to fetch appointments');
-      setLoading(false);
+      console.error('Error fetching appointments:', err);
+      setError('Failed to fetch appointments: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const fetchDoctors = async () => {
     try {
       const response = await api.get('/receptionist/doctors');
-      console.log('Doctors API Response:', response.data);
-      console.log('Doctors data:', response.data.doctors);
+      console.log('Doctors response:', response.data);
       setDoctors(response.data.doctors || []);
+      setError(null);
     } catch (err) {
-      console.error('Fetch doctors error:', err);
-      setError('Failed to fetch doctors');
+      console.error('Error fetching doctors:', err);
+      setError('Failed to fetch doctors: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const fetchQueue = async () => {
     try {
       const response = await api.get('/receptionist/queue');
-      console.log('Queue API Response:', response.data);
+      console.log('Queue response:', response.data);
       setQueue(response.data.queue || []);
+      setError(null);
     } catch (err) {
-      console.error('Fetch queue error:', err);
-      setError('Failed to fetch queue');
-    }
-  };
-
-  const handleAssignDoctor = async (appointmentId, doctorId) => {
-    try {
-      await api.put(`/receptionist/appointments/${appointmentId}/assign`, { doctorId });
-      fetchAppointments();
-    } catch (err) {
-      setError('Failed to assign doctor');
+      console.error('Error fetching queue:', err);
+      setError('Failed to fetch queue: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const handleStatusUpdate = async (appointmentId, status) => {
     try {
+      console.log('Updating appointment status:', appointmentId, status);
       await api.put(`/receptionist/appointments/${appointmentId}`, { status });
-      fetchAppointments();
+      await fetchAppointments();
+      setError(null);
     } catch (err) {
-      setError('Failed to update appointment status');
+      console.error('Error updating appointment status:', err);
+      setError('Failed to update appointment status: ' + (err.response?.data?.message || err.message));
     }
   };
 
-  const handleAddToQueue = async (patientId, doctorId, priority = 'normal') => {
+  const handleAddToQueue = async (e) => {
+    e.preventDefault();
+    if (!selectedPatient) {
+      setError('Please select a patient');
+      return;
+    }
+
     try {
-      await api.post('/receptionist/queue/add', { patientId, doctorId, priority });
-      fetchQueue();
+      console.log('Adding patient to queue:', selectedPatient);
+      await api.post('/receptionist/queue/add', { patientId: selectedPatient });
+      setSelectedPatient('');
+      await fetchQueue();
+      setError(null);
     } catch (err) {
-      setError('Failed to add patient to queue');
+      console.error('Error adding to queue:', err);
+      setError('Failed to add patient to queue: ' + (err.response?.data?.message || err.message));
     }
   };
 
   const handleUpdateQueueStatus = async (queueId, status) => {
     try {
+      console.log('Updating queue status:', queueId, status);
       await api.put(`/receptionist/queue/${queueId}/status`, { status });
-      fetchQueue();
+      await fetchQueue();
+      setError(null);
     } catch (err) {
-      setError('Failed to update queue status');
-    }
-  };
-
-  const handleRemoveFromQueue = async (queueId) => {
-    try {
-      await api.delete(`/receptionist/queue/${queueId}`);
-      fetchQueue();
-    } catch (err) {
-      setError('Failed to remove from queue');
+      console.error('Error updating queue status:', err);
+      setError('Failed to update queue status: ' + (err.response?.data?.message || err.message));
     }
   };
 
   if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="receptionist-dashboard">
-      <div className="dashboard-header">
-        <h1>Receptionist Dashboard</h1>
-        <div className="tab-navigation">
-          <button 
-            className={`tab-button ${activeTab === 'appointments' ? 'active' : ''}`}
-            onClick={() => setActiveTab('appointments')}
-          >
-            Appointments
-          </button>
-          <button 
-            className={`tab-button ${activeTab === 'queue' ? 'active' : ''}`}
-            onClick={() => setActiveTab('queue')}
-          >
-            Queue Management
-          </button>
-        </div>
+      <h1>Receptionist Dashboard</h1>
+      <p>Welcome, {user?.name || user?.email}</p>
+
+      {error && <div className="error-message">{error}</div>}
+      {testResult && <div className="test-result">{testResult}</div>}
+
+      <div className="debug-section">
+        <button onClick={testApiConnection} className="test-button">
+          Test API Connection
+        </button>
+        <p>User Role: {user?.role || 'Unknown'}</p>
+        <p>Token: {localStorage.getItem('token') ? 'Present' : 'Missing'}</p>
+      </div>
+
+      <div className="tab-navigation">
+        <button 
+          className={activeTab === 'appointments' ? 'active' : ''} 
+          onClick={() => setActiveTab('appointments')}
+        >
+          Appointments
+        </button>
+        <button 
+          className={activeTab === 'queue' ? 'active' : ''} 
+          onClick={() => setActiveTab('queue')}
+        >
+          Queue Management
+        </button>
+        <button 
+          className={activeTab === 'doctors' ? 'active' : ''} 
+          onClick={() => setActiveTab('doctors')}
+        >
+          Doctors
+        </button>
       </div>
 
       {activeTab === 'appointments' && (
-        <>
+        <div className="appointments-section">
+          <h2>Appointments</h2>
+          
           <div className="date-filter">
-            <label htmlFor="date">Select Date:</label>
-            <input
-              type="date"
-              id="date"
-              value={selectedDate}
+            <label>Select Date:</label>
+            <input 
+              type="date" 
+              value={selectedDate} 
               onChange={(e) => setSelectedDate(e.target.value)}
             />
           </div>
 
-          <div className="stats">
-            <div className="stat-card">
-              <h3>Total Appointments</h3>
-              <p>{Array.isArray(appointments) ? appointments.length : 0}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Pending</h3>
-              <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'pending').length : 0}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Confirmed</h3>
-              <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'confirmed').length : 0}</p>
-            </div>
-            <div className="stat-card">
-              <h3>Completed</h3>
-              <p>{Array.isArray(appointments) ? appointments.filter(apt => apt.status === 'completed').length : 0}</p>
-            </div>
-          </div>
-
-          <div className="appointments-section">
-            <h2>Appointments for {new Date(selectedDate).toLocaleDateString()}</h2>
-            <div className="appointments-list">
-              {Array.isArray(appointments) && appointments.length > 0 ? (
-                appointments.map(appointment => (
-                  <div key={appointment.id} className="appointment-card">
-                    <div className="appointment-info">
-                      <h3>Patient: {appointment.patient?.name || 'Unknown'}</h3>
-                      <p>Time: {appointment.appointmentTime}</p>
-                      <p>Date: {new Date(appointment.appointmentDate).toLocaleDateString()}</p>
-                      <p>Status: <span className={`status ${appointment.status}`}>{appointment.status}</span></p>
-                      {appointment.doctor && <p>Doctor: {appointment.doctor.name}</p>}
-                      {appointment.reason && <p>Reason: {appointment.reason}</p>}
-                    </div>
-                    <div className="appointment-actions">
-                      {appointment.status === 'pending' && (
-                        <div className="assign-doctor">
-                          <select
-                            onChange={(e) => handleAssignDoctor(appointment.id, e.target.value)}
-                            defaultValue=""
-                          >
-                            <option value="" disabled>Select Doctor</option>
-                            {Array.isArray(doctors) && doctors.map(doctor => (
-                              <option key={doctor.id} value={doctor.id}>
-                                {doctor.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                      {appointment.status === 'confirmed' && (
-                        <button 
-                          className="btn-complete"
-                          onClick={() => handleStatusUpdate(appointment.id, 'completed')}
-                        >
-                          Mark Complete
-                        </button>
-                      )}
-                      {appointment.status === 'pending' && (
-                        <button 
-                          className="btn-cancel"
-                          onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
+          <div className="appointments-list">
+            {appointments.length === 0 ? (
+              <p>No appointments for this date</p>
+            ) : (
+              appointments.map(appointment => (
+                <div key={appointment.id} className="appointment-card">
+                  <div className="appointment-info">
+                    <h3>{appointment.patient?.name || 'Unknown Patient'}</h3>
+                    <p><strong>Doctor:</strong> {appointment.doctor?.name || 'Not assigned'}</p>
+                    <p><strong>Date:</strong> {new Date(appointment.appointmentDate).toLocaleDateString()}</p>
+                    <p><strong>Time:</strong> {appointment.appointmentTime}</p>
+                    <p><strong>Status:</strong> {appointment.status}</p>
+                    <p><strong>Reason:</strong> {appointment.reason}</p>
                   </div>
-                ))
-              ) : (
-                <div className="no-appointments">
-                  <p>No appointments found for this date.</p>
+                  <div className="appointment-actions">
+                    <button 
+                      onClick={() => handleStatusUpdate(appointment.id, 'confirmed')}
+                      className={appointment.status === 'confirmed' ? 'active' : ''}
+                      disabled={appointment.status === 'confirmed'}
+                    >
+                      Confirm
+                    </button>
+                    <button 
+                      onClick={() => handleStatusUpdate(appointment.id, 'cancelled')}
+                      className={appointment.status === 'cancelled' ? 'active' : ''}
+                      disabled={appointment.status === 'cancelled'}
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      onClick={() => handleStatusUpdate(appointment.id, 'completed')}
+                      className={appointment.status === 'completed' ? 'active' : ''}
+                      disabled={appointment.status === 'completed'}
+                    >
+                      Complete
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
+              ))
+            )}
           </div>
-        </>
+        </div>
       )}
 
       {activeTab === 'queue' && (
         <div className="queue-section">
           <h2>Queue Management</h2>
-          
-          {/* Add to Queue Form */}
-          <div className="add-to-queue-form">
-            <h3>Add Patient to Queue</h3>
-            <div className="form-row">
-              <select 
-                id="patientSelect" 
-                className="form-select"
-                onChange={(e) => {
-                  const patientId = e.target.value;
-                  if (patientId) {
-                    handleAddToQueue(parseInt(patientId), null, 'normal');
-                    e.target.value = '';
-                  }
-                }}
-              >
-                <option value="">Select Patient to Add</option>
-                <option value="1">Test Patient (patient1)</option>
-              </select>
-            </div>
+
+          {/* Current Queue Status */}
+          <div className="queue-status-info">
+            <h3>Current Queue Status</h3>
+            <p>People waiting: {Array.isArray(queue) ? queue.filter(q => q.status === 'waiting').length : 0}</p>
+          </div>
+
+          {/* Available Clinicians */}
+          <div className="available-clinicians-info">
+            <h3>Available Clinicians</h3>
+            <ul>
+              {doctors && doctors.length > 0 ? (
+                doctors
+                  .filter(doc => !queue.some(q => q.doctorId === doc.id && (q.status === 'in-consultation' || q.status === 'called')))
+                  .map(doc => (
+                    <li key={doc.id}>{doc.name}</li>
+                  ))
+              ) : (
+                <li>No clinicians available</li>
+              )}
+            </ul>
           </div>
 
           <div className="queue-stats">
@@ -250,40 +250,100 @@ export default function ReceptionistDashboard() {
               <h3>Called</h3>
               <p>{Array.isArray(queue) ? queue.filter(q => q.status === 'called').length : 0}</p>
             </div>
+            <div className="stat-card">
+              <h3>In Consultation</h3>
+              <p>{Array.isArray(queue) ? queue.filter(q => q.status === 'in-consultation').length : 0}</p>
+            </div>
+          </div>
+
+          <div className="add-to-queue-form">
+            <h3>Add Patient to Queue</h3>
+            <form onSubmit={handleAddToQueue}>
+              <div className="form-row">
+                <select 
+                  value={selectedPatient} 
+                  onChange={(e) => setSelectedPatient(e.target.value)}
+                  className="form-select"
+                  required
+                >
+                  <option value="">Select a patient</option>
+                  {appointments
+                    .filter(apt => apt.status === 'confirmed' && apt.patient)
+                    .map(appointment => (
+                      <option key={appointment.id} value={appointment.patient.id}>
+                        {appointment.patient.name} - {appointment.doctor?.name || 'No doctor assigned'}
+                      </option>
+                    ))
+                  }
+                </select>
+                <button type="submit" className="btn-primary">Add to Queue</button>
+              </div>
+            </form>
           </div>
 
           <div className="queue-list">
             <h3>Current Queue</h3>
             {Array.isArray(queue) && queue.length > 0 ? (
-              queue.map(queueItem => (
-                <div key={queueItem.id} className="queue-item">
-                  <div className="queue-info">
-                    <h4>#{queueItem.queueNumber} - {queueItem.patient?.name}</h4>
-                    <p>Status: <span className={`status ${queueItem.status}`}>{queueItem.status}</span></p>
-                    {queueItem.doctor && <p>Doctor: {queueItem.doctor.name}</p>}
-                    {queueItem.priority !== 'normal' && <p>Priority: {queueItem.priority}</p>}
+              <div className="queue-items">
+                {queue.map((item, index) => (
+                  <div key={item.id} className="queue-item">
+                    <div className="queue-number">{item.queueNumber || index + 1}</div>
+                    <div className="queue-info">
+                      <h4>{item.patient?.name || 'Unknown Patient'}</h4>
+                      <p>Doctor: {item.doctor?.name || 'Not assigned'}</p>
+                      <p>Status: {item.status}</p>
+                      <p>Added by: {item.receptionist?.name || 'N/A'}</p>
+                      {item.estimatedWaitTime && (
+                        <p>Estimated wait: {item.estimatedWaitTime} minutes</p>
+                      )}
+                    </div>
+                    <div className="queue-actions">
+                      <button 
+                        onClick={() => handleUpdateQueueStatus(item.id, 'called')}
+                        className={item.status === 'called' ? 'active' : ''}
+                        disabled={item.status === 'called' || item.status === 'in-consultation' || item.status === 'completed'}
+                      >
+                        Call Patient
+                      </button>
+                      <button 
+                        onClick={() => handleUpdateQueueStatus(item.id, 'in-consultation')}
+                        className={item.status === 'in-consultation' ? 'active' : ''}
+                        disabled={item.status === 'in-consultation' || item.status === 'completed'}
+                      >
+                        Start Consultation
+                      </button>
+                      <button 
+                        onClick={() => handleUpdateQueueStatus(item.id, 'completed')}
+                        className={item.status === 'completed' ? 'active' : ''}
+                        disabled={item.status === 'completed'}
+                      >
+                        Complete
+                      </button>
+                    </div>
                   </div>
-                  <div className="queue-actions">
-                    <select
-                      value={queueItem.status}
-                      onChange={(e) => handleUpdateQueueStatus(queueItem.id, e.target.value)}
-                    >
-                      <option value="waiting">Waiting</option>
-                      <option value="called">Called</option>
-                      <option value="in-consultation">In Consultation</option>
-                      <option value="completed">Completed</option>
-                    </select>
-                    <button 
-                      className="btn-remove"
-                      onClick={() => handleRemoveFromQueue(queueItem.id)}
-                    >
-                      Remove
-                    </button>
-                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>No patients in queue</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'doctors' && (
+        <div className="doctors-section">
+          <h2>Available Doctors</h2>
+          <div className="doctors-list">
+            {doctors.length > 0 ? (
+              doctors.map(doctor => (
+                <div key={doctor.id} className="doctor-card">
+                  <h3>{doctor.name}</h3>
+                  <p><strong>Email:</strong> {doctor.email}</p>
+                  <p><strong>Status:</strong> Available</p>
                 </div>
               ))
             ) : (
-              <p>No patients in queue</p>
+              <p>No doctors available</p>
             )}
           </div>
         </div>

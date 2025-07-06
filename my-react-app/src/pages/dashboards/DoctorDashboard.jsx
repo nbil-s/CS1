@@ -7,26 +7,31 @@ import '../Dashboard.css';
 export default function DoctorDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [appointments, setAppointments] = useState([]);
-  const [patients, setPatients] = useState([]);
+  const [queueData, setQueueData] = useState({
+    queue: [],
+    totalWaiting: 0,
+    totalCalled: 0,
+    totalInConsultation: 0
+  });
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchDoctorData();
+    // Refresh queue data every 30 seconds
+    const interval = setInterval(fetchDoctorData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDoctorData = async () => {
     try {
-      const [appointmentsRes, patientsRes, notificationsRes] = await Promise.all([
-        api.get('/doctor/appointments'),
-        api.get('/doctor/patients'),
+      const [queueRes, notificationsRes] = await Promise.all([
+        api.get('/queue/doctor'),
         api.get('/notifications/doctor')
       ]);
 
-      setAppointments(appointmentsRes.data.appointments || []);
-      setPatients(patientsRes.data.patients || []);
+      setQueueData(queueRes.data);
       setNotifications(notificationsRes.data.notifications || []);
     } catch (err) {
       console.error('Error fetching doctor data:', err);
@@ -36,12 +41,12 @@ export default function DoctorDashboard() {
     }
   };
 
-  const updateAppointmentStatus = async (appointmentId, status) => {
+  const updateQueueStatus = async (queueId, status) => {
     try {
-      await api.put(`/doctor/appointments/${appointmentId}`, { status });
+      await api.put(`/queue/${queueId}/status`, { status });
       fetchDoctorData(); // Refresh data
     } catch (err) {
-      console.error('Error updating appointment:', err);
+      console.error('Error updating queue status:', err);
     }
   };
 
@@ -58,7 +63,7 @@ export default function DoctorDashboard() {
 
   const getNotificationIcon = (type) => {
     switch (type) {
-      case 'appointment': return '📅';
+      case 'queue': return '🎫';
       case 'patient': return '👤';
       case 'prescription': return '💊';
       case 'reminder': return '🔔';
@@ -67,17 +72,14 @@ export default function DoctorDashboard() {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   if (loading) return <div className="loading">Loading doctor dashboard...</div>;
   if (error) return <div className="error">{error}</div>;
 
-  const todayAppointments = appointments.filter(apt => 
-    new Date(apt.appointmentDate).toDateString() === new Date().toDateString()
-  );
   const unreadNotifications = notifications.filter(n => !n.read).length;
 
   return (
@@ -86,79 +88,94 @@ export default function DoctorDashboard() {
         <h1>Doctor Dashboard</h1>
         {user && (
           <div className="user-info">
-            <p>Welcome, Dr. {user.name}!</p>
+            <p>Welcome, {user.name}!</p>
           </div>
         )}
       </div>
 
       <div className="dashboard-grid">
         <div className="dashboard-card">
-          <div className="card-icon">📅</div>
-          <h3>Today's Appointments</h3>
-          <p>{todayAppointments.length} appointments scheduled</p>
+          <div className="card-icon">🎫</div>
+          <h3>Queue Management</h3>
+          <p>{queueData.totalWaiting + queueData.totalCalled} patients in queue</p>
           <div className="card-actions">
-            <button onClick={() => navigate('/doctor/appointments')}>View All</button>
-          </div>
-        </div>
-
-        <div className="dashboard-card">
-          <div className="card-icon">👥</div>
-          <h3>My Patients</h3>
-          <p>{patients.length} patients under care</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/doctor/patients')}>View Patients</button>
-          </div>
-        </div>
-
-        <div className="dashboard-card">
-          <div className="card-icon">💊</div>
-          <h3>Prescriptions</h3>
-          <p>Manage patient prescriptions</p>
-          <div className="card-actions">
-            <button onClick={() => navigate('/doctor/prescriptions')}>Write Prescription</button>
+            <button onClick={() => navigate('/doctor/queue')}>View My Queue</button>
           </div>
         </div>
 
         <div className="dashboard-card">
           <div className="card-icon">⏰</div>
-          <h3>Schedule</h3>
-          <p>Manage your availability</p>
+          <h3>Waiting Patients</h3>
+          <p>{queueData.totalWaiting} patients waiting</p>
           <div className="card-actions">
-            <button onClick={() => navigate('/doctor/schedule')}>Update Schedule</button>
+            <button onClick={() => navigate('/doctor/queue')}>Call Next</button>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-icon">👨‍⚕️</div>
+          <h3>In Consultation</h3>
+          <p>{queueData.totalInConsultation} patients</p>
+          <div className="card-actions">
+            <button onClick={() => navigate('/doctor/consultations')}>View Active</button>
+          </div>
+        </div>
+
+        <div className="dashboard-card">
+          <div className="card-icon">📋</div>
+          <h3>Medical Records</h3>
+          <p>Access patient records</p>
+          <div className="card-actions">
+            <button onClick={() => navigate('/doctor/records')}>View Records</button>
           </div>
         </div>
       </div>
 
       <div className="dashboard-sections">
         <div className="section">
-          <h2>Today's Appointments</h2>
-          {todayAppointments.length === 0 ? (
-            <p className="no-data">No appointments scheduled for today.</p>
+          <h2>Current Queue</h2>
+          {queueData.queue.length === 0 ? (
+            <p className="no-data">No patients in your queue currently.</p>
           ) : (
-            <div className="appointments-list">
-              {todayAppointments.map(appointment => (
-                <div key={appointment.id} className="appointment-item">
-                  <div className="appointment-info">
-                    <h4>{appointment.patient?.name || 'Unknown Patient'}</h4>
-                    <p>Time: {formatDate(appointment.appointmentDate)}</p>
-                    <p>Status: <span className={`status-${appointment.status}`}>{appointment.status}</span></p>
+            <div className="queue-list">
+              {queueData.queue.map(queueEntry => (
+                <div key={queueEntry.id} className={`queue-item ${queueEntry.status}`}>
+                  <div className="queue-info">
+                    <div className="queue-number">#{queueEntry.queueNumber}</div>
+                    <div className="patient-details">
+                      <h4>{queueEntry.patient?.name || 'Unknown Patient'}</h4>
+                      <p>Position: {queueEntry.position}</p>
+                      <p>Priority: <span className={`priority-${queueEntry.priority}`}>{queueEntry.priority}</span></p>
+                      {queueEntry.notes && <p>Notes: {queueEntry.notes}</p>}
+                    </div>
+                    <div className="queue-status">
+                      <span className={`status-${queueEntry.status}`}>{queueEntry.status}</span>
+                    </div>
                   </div>
-                  <div className="appointment-actions">
-                    {appointment.status === 'pending' && (
-                      <>
-                        <button 
-                          className="btn-accept"
-                          onClick={() => updateAppointmentStatus(appointment.id, 'confirmed')}
-                        >
-                          Accept
-                        </button>
-                        <button 
-                          className="btn-decline"
-                          onClick={() => updateAppointmentStatus(appointment.id, 'cancelled')}
-                        >
-                          Decline
-                        </button>
-                      </>
+                  <div className="queue-actions">
+                    {queueEntry.status === 'waiting' && (
+                      <button 
+                        className="btn-call"
+                        onClick={() => updateQueueStatus(queueEntry.id, 'called')}
+                      >
+                        Call Patient
+                      </button>
+                    )}
+                    {queueEntry.status === 'called' && (
+                      <button 
+                        className="btn-start"
+                        onClick={() => updateQueueStatus(queueEntry.id, 'in-consultation')}
+                      >
+                        Start Consultation
+                      </button>
+                    )}
+                    {queueEntry.status === 'in-consultation' && (
+                      <button 
+                        className="btn-complete"
+                        onClick={() => updateQueueStatus(queueEntry.id, 'completed')}
+                      >
+                        Complete
+                      </button>
                     )}
                   </div>
                 </div>
@@ -185,7 +202,7 @@ export default function DoctorDashboard() {
                   <div className="notification-content">
                     <h4>{notification.title}</h4>
                     <p>{notification.message}</p>
-                    <span className="notification-date">{formatDate(notification.createdAt)}</span>
+                    <span className="notification-date">{formatTime(notification.createdAt)}</span>
                   </div>
                   {!notification.read && <div className="notification-badge" />}
                 </div>

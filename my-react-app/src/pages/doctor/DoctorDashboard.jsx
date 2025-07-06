@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './DoctorDashboard.css';
 
 export default function DoctorDashboard() {
@@ -8,6 +9,7 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchAppointments();
@@ -83,6 +85,11 @@ export default function DoctorDashboard() {
             <h3>Completed</h3>
             <p>{appointments.filter(apt => apt.status === 'completed').length}</p>
           </div>
+        </div>
+        {/* Add navigation buttons below stats */}
+        <div className="dashboard-actions" style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+          <button onClick={() => navigate('/doctor/consultation')}>In Consultation</button>
+          <button onClick={() => navigate('/doctor/records')}>View Records</button>
         </div>
       </div>
 

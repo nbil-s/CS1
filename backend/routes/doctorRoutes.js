@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const doctorController = require('../controllers/doctorController');
 
+// Public route to get all doctors (for patients to select from)
+router.get('/all', doctorController.getAllDoctors);
+
 // Profile routes
 router.get('/profile', doctorController.getProfile);
 router.put('/profile', doctorController.updateProfile);

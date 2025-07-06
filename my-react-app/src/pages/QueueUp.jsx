@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './QueueUp.css';
 
@@ -9,6 +9,22 @@ function QueueUp() {
     service: '',
     reason: ''
   });
+  const [queue, setQueue] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    // Fetch queue
+    fetch('http://localhost:5000/api/queue/detailed')
+      .then(res => res.json())
+      .then(data => setQueue(data.queue || []))
+      .catch(() => setQueue([]));
+
+    // Fetch available clinicians
+    fetch('http://localhost:5000/api/doctors/available')
+      .then(res => res.json())
+      .then(data => setDoctors(data.doctors || []))
+      .catch(() => setDoctors([]));
+  }, []);
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -90,16 +106,24 @@ function QueueUp() {
           </div>
         </div>
 
-        {/* Future Features Section */}
+        {/* Status Section */}
         <div className="col-md-5">
           <div className="card mb-4 shadow p-3">
             <h6>Current Queue Status</h6>
-            <p><strong>People ahead of you:</strong> <span className="text-muted">[to be calculated]</span></p>
+            <p><strong>People ahead of you:</strong> <span>{queue.filter(q => q.status === 'waiting').length}</span></p>
           </div>
 
           <div className="card shadow p-3">
             <h6>Available Clinicians</h6>
-            <p><strong>Currently Available:</strong> <span className="text-muted">[list to appear here]</span></p>
+            <p><strong>Currently Available:</strong> {doctors.length > 0 ? (
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                {doctors.map(doc => (
+                  <li key={doc.id}>{doc.name}</li>
+                ))}
+              </ul>
+            ) : (
+              <span className="text-muted">No clinicians available</span>
+            )}</p>
           </div>
         </div>
       </div>

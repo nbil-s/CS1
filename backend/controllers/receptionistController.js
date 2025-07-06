@@ -27,9 +27,8 @@ exports.getPendingAppointments = async (req, res) => {
       
       console.log('Receptionist requesting appointments for date:', date);
       
-      let whereClause = { status: 'pending' };
+      let whereClause = {};
       if (date) {
-        // Use DATE() function for more reliable date comparison
         whereClause.appointmentDate = require('sequelize').literal(`DATE(appointmentDate) = '${date}'`);
       }
 
@@ -101,6 +100,7 @@ exports.assignDoctor = async (req, res) => {
       // Create notification for doctor assignment
       await createNotification(
         appointment.patientId,
+        'patient',
         'appointment',
         'Doctor Assigned',
         `Dr. ${doctor.name} has been assigned to your appointment for ${new Date(appointment.appointmentDate).toLocaleDateString()} at ${appointment.appointmentTime}. Your appointment is now confirmed.`,
@@ -154,6 +154,7 @@ exports.updateAppointmentStatus = async (req, res) => {
 
       await createNotification(
         appointment.patientId,
+        'patient',
         'appointment',
         notificationTitle,
         notificationMessage,

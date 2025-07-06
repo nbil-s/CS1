@@ -17,8 +17,9 @@ export default function BookAppointment() {
   // Mock doctors data for small general hospital
   const doctors = [
     { id: 'dr-smith', name: 'Dr. Sarah Smith', specialty: 'General Medicine' },
-    { id: 'dr-johnson', name: 'Dr. Michael Johnson', specialty: 'General Medicine' },
-    { id: 'dr-williams', name: 'Dr. Emily Williams', specialty: 'General Medicine' }
+    { id: 'dr-johnson', name: 'Dr. Michael Johnson', specialty: 'Cardiology' },
+    { id: 'dr-williams', name: 'Dr. Emily Williams', specialty: 'Pediatrics' },
+    { id: 'dr-brown', name: 'Dr. David Brown', specialty: 'Dermatology' }
   ];
 
   // Mock available time slots

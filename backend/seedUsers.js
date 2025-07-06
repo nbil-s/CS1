@@ -12,10 +12,32 @@ async function seedUsers() {
         role: 'patient'
       },
       {
-        name: 'Test Doctor',
-        email: 'doctor1@example.com',
+        name: 'Dr. John Smith',
+        email: 'dr.john@example.com',
         passwordHash: bcrypt.hashSync('password123', 10),
-        role: 'doctor'
+        role: 'doctor',
+        specialization: 'General Medicine'
+      },
+      {
+        name: 'Dr. Sarah Johnson',
+        email: 'dr.sarah@example.com',
+        passwordHash: bcrypt.hashSync('password123', 10),
+        role: 'doctor',
+        specialization: 'Cardiology'
+      },
+      {
+        name: 'Dr. Michael Chen',
+        email: 'dr.michael@example.com',
+        passwordHash: bcrypt.hashSync('password123', 10),
+        role: 'doctor',
+        specialization: 'Pediatrics'
+      },
+      {
+        name: 'Dr. Emily Rodriguez',
+        email: 'dr.emily@example.com',
+        passwordHash: bcrypt.hashSync('password123', 10),
+        role: 'doctor',
+        specialization: 'Dermatology'
       },
       {
         name: 'Test Receptionist',
@@ -47,9 +69,12 @@ async function seedUsers() {
 
     console.log('✅ Test users created successfully!');
     console.log('\nYou can now log in with:');
-    console.log('- Username: patient1, Email: patient1@example.com, Password: password123, Role: patient');
-    console.log('- Username: doctor1, Email: doctor1@example.com, Password: password123, Role: doctor');
-    console.log('- Username: receptionist1, Email: receptionist1@example.com, Password: password123, Role: receptionist');
+    console.log('- Username: Test Patient, Email: patient1@example.com, Password: password123, Role: patient');
+    console.log('- Username: Dr. John Smith, Email: dr.john@example.com, Password: password123, Role: doctor (General Medicine)');
+    console.log('- Username: Dr. Sarah Johnson, Email: dr.sarah@example.com, Password: password123, Role: doctor (Cardiology)');
+    console.log('- Username: Dr. Michael Chen, Email: dr.michael@example.com, Password: password123, Role: doctor (Pediatrics)');
+    console.log('- Username: Dr. Emily Rodriguez, Email: dr.emily@example.com, Password: password123, Role: doctor (Dermatology)');
+    console.log('- Username: Test Receptionist, Email: receptionist1@example.com, Password: password123, Role: receptionist');
     console.log('- Username: admin, Email: admin@example.com, Password: password123, Role: admin');
 
   } catch (error) {
