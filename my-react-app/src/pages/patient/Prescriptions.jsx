@@ -1,44 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 import './Prescriptions.css';
 
 export default function Prescriptions() {
   const navigate = useNavigate();
-  const [prescriptions, setPrescriptions] = useState([
-    {
-      id: 1,
-      date: '2024-01-15',
-      doctor: 'Dr. Smith',
-      medication: 'Amoxicillin 500mg',
-      dosage: '1 capsule, 3 times daily',
-      duration: '7 days',
-      instructions: 'Take with food. Complete the full course.',
-      status: 'Active',
-      refills: 0
-    },
-    {
-      id: 2,
-      date: '2024-01-10',
-      doctor: 'Dr. Johnson',
-      medication: 'Ibuprofen 400mg',
-      dosage: '1 tablet, as needed for pain',
-      duration: '10 days',
-      instructions: 'Take with food. Do not exceed 4 tablets per day.',
-      status: 'Active',
-      refills: 2
-    },
-    {
-      id: 3,
-      date: '2024-01-05',
-      doctor: 'Dr. Williams',
-      medication: 'Omeprazole 20mg',
-      dosage: '1 capsule, once daily',
-      duration: '30 days',
-      instructions: 'Take on an empty stomach, 30 minutes before breakfast.',
-      status: 'Completed',
-      refills: 0
-    }
-  ]);
+  const { user } = useAuth();
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Replace with your actual backend endpoint
+        const response = await api.get('/patient/prescriptions');
+        setPrescriptions(response.data.prescriptions || []);
+      } catch (err) {
+        setError('Failed to fetch prescriptions');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPrescriptions();
+  }, []);
 
   return (
     <div className="dashboard-container">
@@ -48,23 +36,24 @@ export default function Prescriptions() {
           className="logout-button" 
           onClick={() => navigate('/patient/dashboard')}
         >
-          ← Back to Dashboard
+          0 Back to Dashboard
         </button>
       </div>
+
+      {loading && <div>Loading prescriptions...</div>}
+      {error && <div className="error-message">{error}</div>}
 
       <div className="prescriptions-list">
         {prescriptions.map(prescription => (
           <div key={prescription.id} className="prescription-card">
             <div className="prescription-header">
               <h3>{prescription.medication}</h3>
-              <span className={`status ${prescription.status.toLowerCase()}`}>
-                {prescription.status}
-              </span>
+              <span className={`status ${prescription.status?.toLowerCase()}`}>{prescription.status}</span>
             </div>
             <div className="prescription-details">
               <div className="detail-row">
                 <span className="label">Prescribed by:</span>
-                <span className="value">{prescription.doctor}</span>
+                <span className="value">{prescription.doctorName || prescription.doctor}</span>
               </div>
               <div className="detail-row">
                 <span className="label">Date:</span>
@@ -96,6 +85,9 @@ export default function Prescriptions() {
             )}
           </div>
         ))}
+        {!loading && !error && prescriptions.length === 0 && (
+          <div>No prescriptions found.</div>
+        )}
       </div>
     </div>
   );

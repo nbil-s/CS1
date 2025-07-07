@@ -24,10 +24,12 @@ import OtpVerify from './pages/OtpVerify.jsx';
 import NumberAndDetails from './pages/NumberAndDetails.jsx';
 import ViewQueue from './pages/ViewQueue.jsx';
 import AppointmentPage from './pages/AppointmentPage.jsx';
+import { useAuth } from './contexts/AuthContext';
 
 function App() {
   const location = useLocation();
   const isHomepage = location.pathname === '/';
+  const { user } = useAuth();
 
   return (
     <div className="app">
@@ -38,7 +40,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/services" element={<Services />} />
-        <Route path="/book" element={<BookAppointment />} />
+        <Route path="/book" element={
+          user && user.role === 'patient' ? <BookAppointment /> : <Navigate to={user ? `/${user.role}/dashboard` : '/login'} replace />
+        } />
         <Route path="/queue" element={<Queue />} />
         <Route path="/queue-status" element={<QueueStatus />} />
         <Route path="/medical-records" element={<MedicalRecords />} />

@@ -136,7 +136,7 @@ const Homepage = () => {
       <footer className="homepage-footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>MedQueue</h3>
+            <h3>Clinic Queue</h3>
             <p>Transforming healthcare management with technology</p>
           </div>
           <div className="footer-section">
@@ -147,12 +147,12 @@ const Homepage = () => {
           </div>
           <div className="footer-section">
             <h4>Contact</h4>
-            <p>Email: info@medqueue.com</p>
-            <p>Phone: (555) 123-4567</p>
+            <p>Email: info@clinicqueue.com</p>
+            <p>Phone: +254 713 456 7890</p>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 MedQueue. All rights reserved.</p>
+          <p>&copy; 2025 Clinic Queue. All rights reserved.</p>
         </div>
       </footer>
     </div>

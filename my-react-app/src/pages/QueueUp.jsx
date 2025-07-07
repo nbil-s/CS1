@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './QueueUp.css';
+import api from '../services/api';
 
 function QueueUp() {
   const [formData, setFormData] = useState({
@@ -13,14 +14,13 @@ function QueueUp() {
   const [doctors, setDoctors] = useState([]);
 
   useEffect(() => {
-    // Fetch queue
-    fetch('http://localhost:5000/api/queue/detailed')
-      .then(res => res.json())
-      .then(data => setQueue(data.queue || []))
+    // Fetch queue (authenticated)
+    api.get('/queue/detailed')
+      .then(res => setQueue(res.data.queue || []))
       .catch(() => setQueue([]));
 
-    // Fetch available clinicians
-    fetch('http://localhost:5000/api/doctors/available')
+    // Fetch available clinicians (public)
+    fetch('http://localhost:5000/api/doctor/all')
       .then(res => res.json())
       .then(data => setDoctors(data.doctors || []))
       .catch(() => setDoctors([]));
@@ -115,7 +115,8 @@ function QueueUp() {
 
           <div className="card shadow p-3">
             <h6>Available Clinicians</h6>
-            <p><strong>Currently Available:</strong> {doctors.length > 0 ? (
+            <strong>Currently Available:</strong>
+            {doctors.length > 0 ? (
               <ul style={{ margin: 0, paddingLeft: 20 }}>
                 {doctors.map(doc => (
                   <li key={doc.id}>{doc.name}</li>
@@ -123,7 +124,7 @@ function QueueUp() {
               </ul>
             ) : (
               <span className="text-muted">No clinicians available</span>
-            )}</p>
+            )}
           </div>
         </div>
       </div>

@@ -57,6 +57,9 @@ function ViewQueue(){
     );
   }
 
+  // Filter to only show queue entries with no doctor assigned
+  const filteredQueue = queueData.queue.filter(entry => !entry.doctor?.name);
+
   return (
     <div className="container queue-status-page py-5 mt-5">
       <h2 className="text-center mb-4">Current Queue</h2>
@@ -116,8 +119,8 @@ function ViewQueue(){
             </tr>
           </thead>
           <tbody>
-            {queueData.queue.length > 0 ? (
-              queueData.queue.map((entry) => (
+            {filteredQueue.length > 0 ? (
+              filteredQueue.map((entry) => (
                 <tr key={entry.id} className={entry.status === 'waiting' ? 'table-warning' : 
                                              entry.status === 'called' ? 'table-info' : 
                                              entry.status === 'in-consultation' ? 'table-success' : ''}>

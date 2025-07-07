@@ -89,14 +89,14 @@ const AboutUs = () => {
               <FontAwesomeIcon icon={faMapMarkerAlt} />
               <div>
                 <h4>Address</h4>
-                <p>123 Healthcare Avenue<br />Medical District, City 12345</p>
+                <p>5th Avenue<br />Nairobi, Kenya</p>
               </div>
             </div>
             <div className="contact-item">
               <FontAwesomeIcon icon={faPhone} />
               <div>
                 <h4>Phone</h4>
-                <p>+1 (555) 123-4567</p>
+                <p>+254 713 456 7890</p>
               </div>
             </div>
             <div className="contact-item">

@@ -3,6 +3,8 @@ const User = require('./user');
 const Appointment = require('./appointment');
 const Queue = require('./queue');
 const Notification = require('./notification');
+const Prescription = require('./prescription');
+const MedicalRecord = require('./medicalrecord');
 
 // Define relationships - simplified to reduce foreign key constraints
 User.hasMany(Appointment, { as: 'patientAppointments', foreignKey: 'patientId' });
@@ -40,4 +42,4 @@ const initModels = async () => {
   }
 };
 
-module.exports = { initModels, User, Appointment, Queue, Notification };
+module.exports = { initModels, User, Appointment, Queue, Notification, Prescription, MedicalRecord };

@@ -13,6 +13,10 @@ export default function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', email: '', role: '' });
+  const [deleteError, setDeleteError] = useState(null);
 
   // Security check - redirect non-admin users
   useEffect(() => {
@@ -101,6 +105,18 @@ export default function AdminDashboard() {
       case 'patient': return '#6c757d';
       default: return '#6c757d';
     }
+  };
+
+  const openEditModal = (user) => {
+    setUserToEdit(user);
+    setEditForm({ name: user.name, email: user.email, role: user.role });
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setUserToEdit(null);
+    setEditForm({ name: '', email: '', role: '' });
   };
 
   if (loading) return <div className="loading">Loading admin dashboard...</div>;
@@ -217,6 +233,7 @@ export default function AdminDashboard() {
       {activeTab === 'users' && (
         <div className="users-section">
           <h2>User Management</h2>
+          {deleteError && <div className="error">{deleteError}</div>}
           <div className="users-table">
             <table>
               <thead>
@@ -245,15 +262,25 @@ export default function AdminDashboard() {
                     <td>
                       <button 
                         className="btn-edit"
-                        onClick={() => handleUpdateUser(user.id, { role: 'patient' })}
-                        disabled={user.id === user?.id}
+                        onClick={() => openEditModal(user)}
+                        disabled={user && user.id === userToEdit?.id}
                       >
                         Edit
                       </button>
                       <button 
                         className="btn-delete"
-                        onClick={() => handleDeleteUser(user.id)}
-                        disabled={user.id === user?.id}
+                        onClick={async () => {
+                          setDeleteError(null);
+                          console.log('Attempting to delete user:', user.id);
+                          try {
+                            await handleDeleteUser(user.id);
+                            console.log('User deleted:', user.id);
+                          } catch (err) {
+                            console.error('Delete error:', err);
+                            setDeleteError(err.message || 'Failed to delete user');
+                          }
+                        }}
+                        disabled={user && user.id === userToEdit?.id}
                       >
                         Delete
                       </button>
@@ -263,6 +290,59 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Edit Modal */}
+          {editModalOpen && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h3>Edit User</h3>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    console.log('Submitting edit for user:', userToEdit?.id, editForm);
+                    try {
+                      await handleUpdateUser(userToEdit.id, editForm);
+                      console.log('User updated:', userToEdit.id);
+                      closeEditModal();
+                    } catch (err) {
+                      console.error('Edit error:', err);
+                      setError('Failed to update user');
+                    }
+                  }}
+                >
+                  <label>Name:</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                    required
+                  />
+                  <label>Email:</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                    required
+                  />
+                  <label>Role:</label>
+                  <select
+                    value={editForm.role}
+                    onChange={e => setEditForm({ ...editForm, role: e.target.value })}
+                    required
+                  >
+                    <option value="admin">Admin</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="receptionist">Receptionist</option>
+                    <option value="patient">Patient</option>
+                  </select>
+                  <div className="modal-actions">
+                    <button type="submit" className="btn-edit">Save</button>
+                    <button type="button" className="btn-cancel" onClick={closeEditModal}>Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

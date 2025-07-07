@@ -106,18 +106,6 @@ export default function PatientDashboard() {
           <h3>Check Queue</h3>
           <p>View your current position in the queue</p>
         </div>
-
-        <div className="dashboard-card" onClick={() => navigate('/medical-records')}>
-          <div className="card-icon">📋</div>
-          <h3>Medical Records</h3>
-          <p>Access your medical history and test results</p>
-        </div>
-
-        <div className="dashboard-card" onClick={() => navigate('/prescriptions')}>
-          <div className="card-icon">💊</div>
-          <h3>Prescriptions</h3>
-          <p>View your current and past prescriptions</p>
-        </div>
       </div>
 
       <div className="notifications-section">

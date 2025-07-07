@@ -150,7 +150,7 @@ const Services = () => {
             </div>
             <p>For non-emergency inquiries:</p>
             <div className="contact-info">
-              <strong>+1 (555) 123-4567</strong>
+              <strong>+254 713 456 7890</strong>
             </div>
           </div>
         </div>

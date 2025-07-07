@@ -30,15 +30,6 @@ const NavBar = () => {
       <Link to="/queue" className="nav-link">
         <FontAwesomeIcon icon={faListAlt} /> Join Queue
       </Link>
-      <Link to="/queue-status" className="nav-link">
-        <FontAwesomeIcon icon={faEye} /> Queue Status
-      </Link>
-      <Link to="/medical-records" className="nav-link">
-        <FontAwesomeIcon icon={faFileMedical} /> Medical Records
-      </Link>
-      <Link to="/prescriptions" className="nav-link">
-        <FontAwesomeIcon icon={faPills} /> Prescriptions
-      </Link>
     </>
   );
 

@@ -268,7 +268,7 @@ export default function ReceptionistDashboard() {
                 >
                   <option value="">Select a patient</option>
                   {appointments
-                    .filter(apt => apt.status === 'confirmed' && apt.patient)
+                    .filter(apt => apt.status === 'confirmed' && apt.patient && apt.patient.role === 'patient')
                     .map(appointment => (
                       <option key={appointment.id} value={appointment.patient.id}>
                         {appointment.patient.name} - {appointment.doctor?.name || 'No doctor assigned'}

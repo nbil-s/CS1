@@ -26,8 +26,8 @@ function AppointmentPage (){
             </div>
             <div className="col-md-6">
               <label htmlFor="department" className="form-label">Department</label>
-              <select className="form-select" id="department">
-                <option selected disabled>Choose...</option>
+              <select className="form-select" id="department" defaultValue="">
+                <option value="" disabled>Choose...</option>
                 <option>General Consultation</option>
                 <option>Dental</option>
                 <option>Pediatrics</option>
@@ -39,8 +39,8 @@ function AppointmentPage (){
           <div className="row mb-3">
             <div className="col-md-6">
               <label htmlFor="clinician" className="form-label">Clinician</label>
-              <select className="form-select" id="clinician">
-                <option selected disabled>Select Clinician</option>
+              <select className="form-select" id="clinician" defaultValue="">
+                <option value="" disabled>Select Clinician</option>
                 <option>Dr. Mwangi</option>
                 <option>Dr. Wanjiku</option>
                 <option>Dr. Otieno</option>
